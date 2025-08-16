@@ -87,10 +87,9 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
           PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
           PackageManager.DONT_KILL_APP)
       
-      // Restart the app to apply the icon change
-      val intent = Intent(activity, activity!!.javaClass)
-      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-      activity!!.startActivity(intent)
+      // Don't restart the app - let the user restart manually
+      // The icon change will take effect when the app is restarted
+      Log.i("DynamicAppIconPlus", "Icon changed to $iconIdentifier. Please restart the app to see the change.")
       
       result.success(true)
     } catch (e: Exception) {
@@ -143,10 +142,9 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
           PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
           PackageManager.DONT_KILL_APP)
       
-      // Restart the app to apply the icon change
-      val intent = Intent(activity, activity!!.javaClass)
-      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-      activity!!.startActivity(intent)
+      // Don't restart the app - let the user restart manually
+      // The icon change will take effect when the app is restarted
+      Log.i("DynamicAppIconPlus", "Icon reset to default. Please restart the app to see the change.")
       
       result.success(true)
     } catch (e: Exception) {
