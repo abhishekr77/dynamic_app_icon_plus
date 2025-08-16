@@ -9,7 +9,7 @@ class DynamicAppIconPlusBuildRunner {
   final String projectRoot;
   final String configPath;
 
-  DynamicAppIconsBuildRunner({
+  DynamicAppIconPlusBuildRunner({
     required this.projectRoot,
     required this.configPath,
   });
