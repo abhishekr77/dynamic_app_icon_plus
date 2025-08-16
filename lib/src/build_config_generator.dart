@@ -55,6 +55,7 @@ class BuildConfigGenerator {
       buffer.writeln('        <activity-alias');
       buffer.writeln('            android:name=".${icon.identifier}Activity"');
       buffer.writeln('            android:enabled="false"');
+      buffer.writeln('            android:exported="true"');
       buffer.writeln('            android:icon="@mipmap/ic_launcher_${icon.identifier}"');
       buffer.writeln('            android:targetActivity=".MainActivity">');
       buffer.writeln('            <intent-filter>');
