@@ -2,6 +2,7 @@ library dynamic_app_icon_plus;
 
 import 'dart:async';
 import 'dart:io';
+import 'package:path/path.dart' as path;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -96,9 +97,43 @@ class DynamicAppIconPlus {
   /// 
   /// This method should be called before using any other methods.
   /// The [configPath] should point to a YAML file containing icon definitions.
+  /// The method will try to find the file in the following locations:
+  /// 1. As an absolute path
+  /// 2. Relative to the current working directory
+  /// 3. In the app's assets folder
   static Future<void> initialize(String configPath, {bool validateFiles = true}) async {
     try {
-      _config = IconConfig.fromYamlFile(configPath);
+      // Try to find the config file in multiple locations
+      String? actualPath;
+      
+      // First, try the path as-is (absolute or relative to current directory)
+      if (File(configPath).existsSync()) {
+        actualPath = configPath;
+      } else {
+        // Try to find it in common locations
+        final possiblePaths = [
+          configPath,
+          path.join(Directory.current.path, configPath),
+          path.join(Directory.current.path, 'assets', configPath),
+          path.join(Directory.current.path, 'lib', configPath),
+        ];
+        
+        for (final possiblePath in possiblePaths) {
+          if (File(possiblePath).existsSync()) {
+            actualPath = possiblePath;
+            break;
+          }
+        }
+      }
+      
+      if (actualPath == null) {
+        throw FileSystemException(
+          'Configuration file not found. Tried: $configPath, ${path.join(Directory.current.path, configPath)}, ${path.join(Directory.current.path, "assets", configPath)}, ${path.join(Directory.current.path, "lib", configPath)}',
+          configPath,
+        );
+      }
+      
+      _config = IconConfig.fromYamlFile(actualPath);
       final errors = _config!.validate(checkFiles: validateFiles);
       
       if (errors.isNotEmpty) {
