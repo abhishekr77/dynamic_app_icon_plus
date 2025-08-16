@@ -1,4 +1,4 @@
-# Dynamic App Icons
+# Dynamic App Icon Plus
 
 A Flutter plugin that allows you to dynamically change your app's icon on Android at runtime.
 
@@ -16,7 +16,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  dynamic_app_icons: ^0.0.1
+  dynamic_app_icon_plus: ^0.0.1
 ```
 
 ### Requirements
@@ -31,10 +31,10 @@ The plugin includes a command-line tool for easy setup:
 
 ```bash
 # Set up dynamic app icons with default config file
-dart run dynamic_app_icons:setup
+dart run dynamic_app_icon_plus:dynamic_app_icon_plus
 
 # Set up with custom config file
-dart run dynamic_app_icons:setup my_icons.yaml
+dart run dynamic_app_icon_plus:dynamic_app_icon_plus my_icons.yaml
 ```
 
 The command-line tool will:
@@ -85,8 +85,7 @@ Run the setup command to automatically configure your project:
 dart run dynamic_app_icons:setup icon_config.yaml
 
 # Or using the Dart API
-await DynamicAppIcons.setup('icon_config.yaml');
-```
+await DynamicAppIconPlus.setup('icon_config.yaml');
 
 This will automatically:
 - ✅ Generate Android manifest modifications
@@ -170,13 +169,13 @@ Place your icon files in the appropriate `mipmap` folders:
 ### 1. Quick Setup (Recommended)
 
 ```dart
-import 'package:dynamic_app_icons/dynamic_app_icons.dart';
+import 'package:dynamic_app_icon_plus/dynamic_app_icon_plus.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Automatic setup and initialization
-  await DynamicAppIcons.setup('icon_config.yaml');
+  await DynamicAppIconPlus.setup('icon_config.yaml');
   
   runApp(MyApp());
 }
@@ -185,13 +184,13 @@ void main() async {
 ### 2. Manual Initialization
 
 ```dart
-import 'package:dynamic_app_icons/dynamic_app_icons.dart';
+import 'package:dynamic_app_icon_plus/dynamic_app_icon_plus.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Initialize with configuration file
-  await DynamicAppIcons.initialize('icon_config.yaml');
+  await DynamicAppIconPlus.initialize('icon_config.yaml');
   
   runApp(MyApp());
 }
@@ -202,7 +201,7 @@ void main() async {
 ```dart
 // Change to Christmas icon
 try {
-  bool success = await DynamicAppIcons.changeIcon('christmas');
+  bool success = await DynamicAppIconPlus.changeIcon('christmas');
   if (success) {
     print('Icon changed successfully!');
   }
@@ -216,7 +215,7 @@ try {
 ```dart
 // Reset to default icon
 try {
-  bool success = await DynamicAppIcons.resetToDefault();
+  bool success = await DynamicAppIconPlus.resetToDefault();
   if (success) {
     print('Icon reset successfully!');
   }
@@ -229,11 +228,11 @@ try {
 
 ```dart
 // Get all available icon identifiers
-List<String> availableIcons = DynamicAppIcons.availableIcons;
+List<String> availableIcons = DynamicAppIconPlus.availableIcons;
 print('Available icons: $availableIcons');
 
 // Check if an icon is valid
-bool isValid = DynamicAppIcons.isValidIcon('christmas');
+bool isValid = DynamicAppIconPlus.isValidIcon('christmas');
 print('Christmas icon is valid: $isValid');
 ```
 
@@ -241,7 +240,7 @@ print('Christmas icon is valid: $isValid');
 
 ```dart
 // Get the currently active icon identifier
-String? currentIcon = await DynamicAppIcons.getCurrentIcon();
+String? currentIcon = await DynamicAppIconPlus.getCurrentIcon();
 print('Current icon: $currentIcon');
 ```
 
@@ -318,7 +317,7 @@ The plugin provides comprehensive error handling:
 
 ```dart
 try {
-  await DynamicAppIcons.changeIcon('invalid_icon');
+  await DynamicAppIconPlus.changeIcon('invalid_icon');
 } on ArgumentError catch (e) {
   print('Invalid icon identifier: $e');
 } on StateError catch (e) {

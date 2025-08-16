@@ -1,4 +1,4 @@
-library dynamic_app_icons;
+library dynamic_app_icon_plus;
 
 import 'dart:async';
 import 'dart:io';
@@ -10,8 +10,8 @@ import 'src/icon_config.dart';
 import 'src/build_runner.dart';
 
 /// A Flutter plugin for dynamically changing app icons on Android.
-class DynamicAppIcons {
-  static const MethodChannel _channel = MethodChannel('dynamic_app_icons');
+class DynamicAppIconPlus {
+  static const MethodChannel _channel = MethodChannel('dynamic_app_icon_plus');
   
   static IconConfig? _config;
   static bool _initialized = false;
@@ -30,7 +30,7 @@ class DynamicAppIcons {
   /// Throws an [ArgumentError] if the icon identifier is not valid.
   static Future<bool> changeIcon(String iconIdentifier) async {
     if (!_initialized) {
-      throw StateError('DynamicAppIcons has not been initialized. Call initialize() first.');
+      throw StateError('DynamicAppIconPlus has not been initialized. Call initialize() first.');
     }
     
     if (!isValidIcon(iconIdentifier)) {
@@ -107,7 +107,7 @@ class DynamicAppIcons {
       
       _initialized = true;
     } catch (e) {
-      throw FormatException('Failed to initialize DynamicAppIcons: $e');
+      throw FormatException('Failed to initialize DynamicAppIconPlus: $e');
     }
   }
 
@@ -126,7 +126,7 @@ class DynamicAppIcons {
       
       _initialized = true;
     } catch (e) {
-      throw FormatException('Failed to initialize DynamicAppIcons: $e');
+      throw FormatException('Failed to initialize DynamicAppIconPlus: $e');
     }
   }
 
@@ -168,7 +168,7 @@ class DynamicAppIcons {
   /// This is a convenience method that combines initialization and setup.
   static Future<void> setup(String configPath) async {
     final projectRoot = Directory.current.path;
-    final runner = DynamicAppIconsBuildRunner(
+    final runner = DynamicAppIconPlusBuildRunner(
       projectRoot: projectRoot,
       configPath: configPath,
     );
@@ -182,7 +182,7 @@ class DynamicAppIcons {
   /// Returns a list of error messages, or an empty list if everything is valid.
   static Future<List<String>> validateSetup(String configPath) async {
     final projectRoot = Directory.current.path;
-    final runner = DynamicAppIconsBuildRunner(
+    final runner = DynamicAppIconPlusBuildRunner(
       projectRoot: projectRoot,
       configPath: configPath,
     );
@@ -193,7 +193,7 @@ class DynamicAppIcons {
   /// Creates a backup of the Android manifest before making changes.
   static Future<void> backupAndroidManifest() async {
     final projectRoot = Directory.current.path;
-    final runner = DynamicAppIconsBuildRunner(
+    final runner = DynamicAppIconPlusBuildRunner(
       projectRoot: projectRoot,
       configPath: 'icon_config.yaml', // Default config path
     );
@@ -204,7 +204,7 @@ class DynamicAppIcons {
   /// Restores the Android manifest from backup.
   static Future<void> restoreAndroidManifest() async {
     final projectRoot = Directory.current.path;
-    final runner = DynamicAppIconsBuildRunner(
+    final runner = DynamicAppIconPlusBuildRunner(
       projectRoot: projectRoot,
       configPath: 'icon_config.yaml', // Default config path
     );

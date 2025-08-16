@@ -53,13 +53,13 @@ Once set up, changing icons is simple:
 
 ```dart
 // Change to Christmas icon
-await DynamicAppIcons.changeIcon('christmas');
+await DynamicAppIconPlus.changeIcon('christmas');
 
 // Change to Halloween icon
-await DynamicAppIcons.changeIcon('halloween');
+await DynamicAppIconPlus.changeIcon('halloween');
 
 // Reset to default
-await DynamicAppIcons.resetToDefault();
+await DynamicAppIconPlus.resetToDefault();
 ```
 
 ## Example App Features
@@ -83,12 +83,12 @@ dart run dynamic_app_icons:validate example_config.yaml
 
 2. **Restore Android manifest** (if needed):
 ```dart
-await DynamicAppIcons.restoreAndroidManifest();
+await DynamicAppIconPlus.restoreAndroidManifest();
 ```
 
 3. **Validate setup**:
 ```dart
-final errors = await DynamicAppIcons.validateSetup('example_config.yaml');
+final errors = await DynamicAppIconPlus.validateSetup('example_config.yaml');
 if (errors.isNotEmpty) {
   print('Setup errors: ${errors.join('\n')}');
 }

@@ -8,14 +8,14 @@ import '../lib/src/build_config_generator.dart';
 /// Command-line tool for setting up dynamic app icons
 void main(List<String> args) async {
   if (args.isEmpty) {
-    print('Usage: dart run dynamic_app_icons:setup [config_file]');
+    print('Usage: dart run dynamic_app_icon_plus:dynamic_app_icon_plus [config_file]');
     print('');
     print('Options:');
     print('  config_file    Path to the YAML configuration file (default: icon_config.yaml)');
     print('');
     print('Examples:');
-    print('  dart run dynamic_app_icons:setup');
-    print('  dart run dynamic_app_icons:setup my_icons.yaml');
+    print('  dart run dynamic_app_icon_plus:dynamic_app_icon_plus');
+    print('  dart run dynamic_app_icon_plus:dynamic_app_icon_plus my_icons.yaml');
     exit(1);
   }
 
@@ -104,10 +104,10 @@ void main(List<String> args) async {
     print('   - android/app/src/main/res/mipmap-xxxhdpi/');
     print('');
     print('2. Initialize the plugin in your app:');
-    print('   await DynamicAppIcons.initialize(\'$configFile\');');
+    print('   await DynamicAppIconPlus.initialize(\'$configFile\');');
     print('');
     print('3. Use the plugin to change icons:');
-    print('   await DynamicAppIcons.changeIcon(\'${config.availableIcons.first}\');');
+    print('   await DynamicAppIconPlus.changeIcon(\'${config.availableIcons.first}\');');
     print('');
 
   } catch (e) {

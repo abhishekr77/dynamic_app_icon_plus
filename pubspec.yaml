@@ -1,9 +1,9 @@
-name: dynamic_app_icons
+name: dynamic_app_icon_plus
 description: A Flutter plugin for dynamically changing app icons on Android at runtime with simple YAML configuration.
 version: 0.0.1
-homepage: https://github.com/yourusername/dynamic_app_icons
-repository: https://github.com/yourusername/dynamic_app_icons
-issue_tracker: https://github.com/yourusername/dynamic_app_icons/issues
+homepage: https://github.com/yourusername/dynamic_app_icon_plus
+repository: https://github.com/yourusername/dynamic_app_icon_plus
+issue_tracker: https://github.com/yourusername/dynamic_app_icon_plus/issues
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -33,7 +33,7 @@ flutter:
 
 # Executables for command-line tools
 executables:
-  dynamic_app_icons: dynamic_app_icons
+  dynamic_app_icon_plus: dynamic_app_icon_plus
 
 # Additional metadata for pub.dev
 topics:

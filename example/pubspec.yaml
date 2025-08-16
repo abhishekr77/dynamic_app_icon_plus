@@ -11,7 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  dynamic_app_icons:
+  dynamic_app_icon_plus:
     path: ../
 
 dev_dependencies:

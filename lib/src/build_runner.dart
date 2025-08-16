@@ -5,7 +5,7 @@ import 'build_config_generator.dart';
 
 /// Build runner for dynamic app icons
 /// This can be integrated with Flutter's build system
-class DynamicAppIconsBuildRunner {
+class DynamicAppIconPlusBuildRunner {
   final String projectRoot;
   final String configPath;
 

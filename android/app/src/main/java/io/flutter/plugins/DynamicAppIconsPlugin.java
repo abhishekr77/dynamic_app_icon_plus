@@ -21,8 +21,8 @@ import io.flutter.plugin.common.PluginRegistry;
 import java.util.HashMap;
 import java.util.Map;
 
-/** DynamicAppIconsPlugin */
-public class DynamicAppIconsPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
+/** DynamicAppIconPlusPlugin */
+public class DynamicAppIconPlusPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
   /// The MethodChannel that will the communication between Flutter and native Android
   ///
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
@@ -33,13 +33,13 @@ public class DynamicAppIconsPlugin implements FlutterPlugin, MethodCallHandler, 
 
   // Legacy plugin registration method for Flutter < 1.12
   public static void registerWith(PluginRegistry.Registrar registrar) {
-    final MethodChannel channel = new MethodChannel(registrar.messenger(), "dynamic_app_icons");
-    channel.setMethodCallHandler(new DynamicAppIconsPlugin());
+    final MethodChannel channel = new MethodChannel(registrar.messenger(), "dynamic_app_icon_plus");
+    channel.setMethodCallHandler(new DynamicAppIconPlusPlugin());
   }
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-    channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "dynamic_app_icons");
+    channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "dynamic_app_icon_plus");
     channel.setMethodCallHandler(this);
     context = flutterPluginBinding.getApplicationContext();
   }
@@ -102,7 +102,7 @@ public class DynamicAppIconsPlugin implements FlutterPlugin, MethodCallHandler, 
       
       result.success(true);
     } catch (Exception e) {
-      Log.e("DynamicAppIcons", "Error changing icon: " + e.getMessage());
+      Log.e("DynamicAppIconPlus", "Error changing icon: " + e.getMessage());
       result.error("ICON_CHANGE_ERROR", "Failed to change icon: " + e.getMessage(), null);
     }
   }
@@ -130,7 +130,7 @@ public class DynamicAppIconsPlugin implements FlutterPlugin, MethodCallHandler, 
       // In a real implementation, you'd need to track which icon is currently active
       result.success("default");
     } catch (Exception e) {
-      Log.e("DynamicAppIcons", "Error getting current icon: " + e.getMessage());
+      Log.e("DynamicAppIconPlus", "Error getting current icon: " + e.getMessage());
       result.success(null);
     }
   }
@@ -162,7 +162,7 @@ public class DynamicAppIconsPlugin implements FlutterPlugin, MethodCallHandler, 
       
       result.success(true);
     } catch (Exception e) {
-      Log.e("DynamicAppIcons", "Error resetting icon: " + e.getMessage());
+      Log.e("DynamicAppIconPlus", "Error resetting icon: " + e.getMessage());
       result.error("ICON_RESET_ERROR", "Failed to reset icon: " + e.getMessage(), null);
     }
   }

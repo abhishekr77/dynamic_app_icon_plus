@@ -108,7 +108,7 @@ void main() async {
   print('');
   print('Available icons: ${config.availableIcons.join(', ')}');
   print('');
-  print('Setup complete! You can now use DynamicAppIcons.changeIcon() in your app.');
+  print('Setup complete! You can now use DynamicAppIconPlus.changeIcon() in your app.');
 }
 ''';
   }
@@ -135,10 +135,10 @@ void main() async {
     buffer.writeln();
     buffer.writeln('```dart');
     buffer.writeln('// Change to a specific icon');
-    buffer.writeln('await DynamicAppIcons.changeIcon(\'${config.availableIcons.first}\');');
+    buffer.writeln('await DynamicAppIconPlus.changeIcon(\'${config.availableIcons.first}\');');
     buffer.writeln();
     buffer.writeln('// Reset to default');
-    buffer.writeln('await DynamicAppIcons.resetToDefault();');
+    buffer.writeln('await DynamicAppIconPlus.resetToDefault();');
     buffer.writeln('```');
     
     return buffer.toString();

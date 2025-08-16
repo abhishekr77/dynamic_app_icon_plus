@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:dynamic_app_icons/dynamic_app_icons.dart';
+import 'package:dynamic_app_icon_plus/dynamic_app_icon_plus.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Automatic setup and initialization
   try {
-    await DynamicAppIcons.setup('example_config.yaml');
+    await DynamicAppIconPlus.setup('example_config.yaml');
     print('Plugin setup and initialized successfully');
   } catch (e) {
     print('Failed to setup plugin: $e');
@@ -50,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _loadCurrentIcon() async {
     try {
-      final icon = await DynamicAppIcons.getCurrentIcon();
+      final icon = await DynamicAppIconPlus.getCurrentIcon();
       setState(() {
         currentIcon = icon;
       });
@@ -65,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     try {
-      final success = await DynamicAppIcons.changeIcon(iconIdentifier);
+      final success = await DynamicAppIconPlus.changeIcon(iconIdentifier);
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -102,7 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     try {
-      final success = await DynamicAppIcons.resetToDefault();
+      final success = await DynamicAppIconPlus.resetToDefault();
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -174,7 +174,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Expanded(
               child: ListView(
                 children: [
-                  ...DynamicAppIcons.availableIcons.map((iconId) {
+                  ...DynamicAppIconPlus.availableIcons.map((iconId) {
                     final isCurrent = currentIcon == iconId;
                     return Card(
                       margin: EdgeInsets.only(bottom: 8),
