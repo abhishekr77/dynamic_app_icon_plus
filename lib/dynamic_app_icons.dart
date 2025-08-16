@@ -99,8 +99,8 @@ class DynamicAppIconPlus {
   /// The [configPath] should point to a YAML file containing icon definitions.
   /// The method will try to find the file in the following locations:
   /// 1. As an absolute path
-  /// 2. Relative to the current working directory
-  /// 3. In the app's assets folder
+  /// 2. In the app's assets (if added to pubspec.yaml)
+  /// 3. In the app's documents directory
   static Future<void> initialize(String configPath, {bool validateFiles = true}) async {
     try {
       // Try to find the config file in multiple locations
@@ -110,7 +110,23 @@ class DynamicAppIconPlus {
       if (File(configPath).existsSync()) {
         actualPath = configPath;
       } else {
-        // Try to find it in common locations
+        // Try to load from assets first (most common case)
+        try {
+          final assetData = await rootBundle.loadString(configPath);
+          _config = IconConfig.fromYamlString(assetData);
+          final errors = _config!.validate(checkFiles: validateFiles);
+          
+          if (errors.isNotEmpty) {
+            throw FormatException('Configuration validation failed:\n${errors.join('\n')}');
+          }
+          
+          _initialized = true;
+          return; // Successfully loaded from assets
+        } catch (e) {
+          // Not found in assets, continue to try file system
+        }
+        
+        // Try to find it in common file system locations
         final possiblePaths = [
           configPath,
           path.join(Directory.current.path, configPath),
@@ -128,7 +144,7 @@ class DynamicAppIconPlus {
       
       if (actualPath == null) {
         throw FileSystemException(
-          'Configuration file not found. Tried: $configPath, ${path.join(Directory.current.path, configPath)}, ${path.join(Directory.current.path, "assets", configPath)}, ${path.join(Directory.current.path, "lib", configPath)}',
+          'Configuration file not found. Tried: $configPath, ${path.join(Directory.current.path, configPath)}, ${path.join(Directory.current.path, "assets", configPath)}, ${path.join(Directory.current.path, "lib", configPath)}. Please ensure the file exists and is added to your pubspec.yaml assets section.',
           configPath,
         );
       }
