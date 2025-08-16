@@ -50,6 +50,7 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       "isSupported" -> result.success(true) // Android supports dynamic icons
       "getCurrentIcon" -> getCurrentIcon(result)
       "resetToDefault" -> resetToDefault(result)
+      "resetForDevelopment" -> resetForDevelopment(result)
       else -> result.notImplemented()
     }
   }
@@ -73,19 +74,29 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       val newComponent = ComponentName(packageName, 
           "$packageName.${iconIdentifier}Activity")
       
-      // Disable the current component (default or previous icon)
-      val currentComponent = if (pm.getComponentEnabledSetting(newComponent) == 
-          PackageManager.COMPONENT_ENABLED_STATE_ENABLED) newComponent else 
-          ComponentName(packageName, "$packageName.MainActivity")
+      // Check if we're in debug mode - if so, don't disable MainActivity
+      val isDebug = (activity!!.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
       
-      pm.setComponentEnabledSetting(currentComponent, 
-          PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 
-          PackageManager.DONT_KILL_APP)
-      
-      // Enable the new component
-      pm.setComponentEnabledSetting(newComponent, 
-          PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
-          PackageManager.DONT_KILL_APP)
+      if (!isDebug) {
+        // In release mode, disable the current component and enable the new one
+        val currentComponent = if (pm.getComponentEnabledSetting(newComponent) == 
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED) newComponent else 
+            ComponentName(packageName, "$packageName.MainActivity")
+        
+        pm.setComponentEnabledSetting(currentComponent, 
+            PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 
+            PackageManager.DONT_KILL_APP)
+        
+        // Enable the new component
+        pm.setComponentEnabledSetting(newComponent, 
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
+            PackageManager.DONT_KILL_APP)
+      } else {
+        // In debug mode, just enable the new component without disabling MainActivity
+        pm.setComponentEnabledSetting(newComponent, 
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
+            PackageManager.DONT_KILL_APP)
+      }
       
       // Don't restart the app - let the user restart manually
       // The icon change will take effect when the app is restarted
@@ -150,6 +161,45 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
     } catch (e: Exception) {
       Log.e("DynamicAppIconPlus", "Error resetting icon: ${e.message}")
       result.error("RESET_ICON_ERROR", "Failed to reset icon: ${e.message}", null)
+    }
+  }
+
+  private fun resetForDevelopment(result: Result) {
+    if (activity == null) {
+      result.error("NO_ACTIVITY", "Activity is not available", null)
+      return
+    }
+
+    try {
+      val pm = activity!!.packageManager
+      val packageName = activity!!.packageName
+      
+      // Enable MainActivity for development
+      val mainActivity = ComponentName(packageName, "$packageName.MainActivity")
+      pm.setComponentEnabledSetting(mainActivity, 
+          PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
+          PackageManager.DONT_KILL_APP)
+      
+      // Also enable all activity aliases for development
+      // This ensures the app can be launched from any icon
+      val availableIcons = listOf("christmas", "halloween", "payme", "independance") // Add your icon names here
+      for (iconName in availableIcons) {
+        try {
+          val iconComponent = ComponentName(packageName, "$packageName.${iconName}Activity")
+          pm.setComponentEnabledSetting(iconComponent, 
+              PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
+              PackageManager.DONT_KILL_APP)
+        } catch (e: Exception) {
+          // Ignore errors for non-existent activities
+          Log.d("DynamicAppIconPlus", "Activity alias $iconName not found, skipping")
+        }
+      }
+      
+      Log.i("DynamicAppIconPlus", "All activities enabled for development")
+      result.success(true)
+    } catch (e: Exception) {
+      Log.e("DynamicAppIconPlus", "Error resetting for development: ${e.message}")
+      result.error("RESET_DEV_ERROR", "Failed to reset for development: ${e.message}", null)
     }
   }
 

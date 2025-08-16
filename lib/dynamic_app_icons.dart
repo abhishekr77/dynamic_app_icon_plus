@@ -93,6 +93,24 @@ class DynamicAppIconPlus {
     }
   }
 
+  /// Resets all activities to enabled state for development.
+  /// 
+  /// This method enables both MainActivity and all activity aliases,
+  /// ensuring the app can be launched during development.
+  /// Returns `true` if the reset was successful, `false` otherwise.
+  static Future<bool> resetForDevelopment() async {
+    try {
+      final bool result = await _channel.invokeMethod('resetForDevelopment');
+      return result;
+    } on PlatformException catch (e) {
+      throw PlatformException(
+        code: e.code,
+        message: e.message,
+        details: e.details,
+      );
+    }
+  }
+
   /// Initializes the plugin with a configuration file.
   /// 
   /// This method should be called before using any other methods.
