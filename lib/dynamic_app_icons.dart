@@ -114,7 +114,7 @@ class DynamicAppIconPlus {
         try {
           final assetData = await rootBundle.loadString(configPath);
           _config = IconConfig.fromYamlString(assetData);
-          final errors = _config!.validate(checkFiles: validateFiles);
+          final errors = _config!.validate(checkFiles: false); // Skip file validation for assets
           
           if (errors.isNotEmpty) {
             throw FormatException('Configuration validation failed:\n${errors.join('\n')}');

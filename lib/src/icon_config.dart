@@ -144,7 +144,8 @@ class IconDefinition {
     }
 
     // Check if the icon file exists (optional for testing)
-    if (checkFiles) {
+    // Skip file existence check for asset paths as they're handled differently
+    if (checkFiles && !path.startsWith('assets/')) {
       final file = File(path);
       if (!file.existsSync()) {
         errors.add('Icon file not found: $path');
