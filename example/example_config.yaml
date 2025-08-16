@@ -1,0 +1,33 @@
+# Dynamic App Icons Configuration
+# This file defines the available app icons that can be changed dynamically
+
+# Default icon identifier (optional)
+# If specified, this icon will be used as the default when resetting
+default_icon: "default"
+
+# Icon definitions
+icons:
+  # Simple format: just a path to the icon file
+  default:
+    path: "assets/icons/default_icon.png"
+    label: "Default Icon"
+    description: "The default app icon"
+  
+  # Advanced format with multiple sizes
+  christmas:
+    path: "assets/icons/christmas_icon.png"
+    sizes:
+      hdpi: "assets/icons/christmas_icon_hdpi.png"
+      xhdpi: "assets/icons/christmas_icon_xhdpi.png"
+      xxhdpi: "assets/icons/christmas_icon_xxhdpi.png"
+    label: "Christmas Icon"
+    description: "Festive Christmas-themed app icon"
+  
+  # Another example
+  halloween:
+    path: "assets/icons/halloween_icon.png"
+    label: "Halloween Icon"
+    description: "Spooky Halloween-themed app icon"
+  
+  # Minimal format (just the path)
+  new_year: "assets/icons/new_year_icon.png"
