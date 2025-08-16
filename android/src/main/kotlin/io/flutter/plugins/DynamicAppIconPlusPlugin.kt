@@ -74,28 +74,44 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       val newComponent = ComponentName(packageName, 
           "$packageName.${iconIdentifier}Activity")
       
-      // Check if we're in debug mode - if so, don't disable MainActivity
+      // Check if we're in debug mode
       val isDebug = (activity!!.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
       
-      if (!isDebug) {
-        // In release mode, disable the current component and enable the new one
-        val currentComponent = if (pm.getComponentEnabledSetting(newComponent) == 
-            PackageManager.COMPONENT_ENABLED_STATE_ENABLED) newComponent else 
-            ComponentName(packageName, "$packageName.MainActivity")
-        
-        pm.setComponentEnabledSetting(currentComponent, 
-            PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 
-            PackageManager.DONT_KILL_APP)
-        
-        // Enable the new component
-        pm.setComponentEnabledSetting(newComponent, 
+      // First, disable all activity aliases and MainActivity
+      val mainActivity = ComponentName(packageName, "$packageName.MainActivity")
+      val availableIcons = listOf("christmas", "halloween", "payme", "independance") // Add your icon names here
+      
+      // Disable MainActivity
+      pm.setComponentEnabledSetting(mainActivity, 
+          PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 
+          PackageManager.DONT_KILL_APP)
+      
+      // Disable all activity aliases
+      for (iconName in availableIcons) {
+        try {
+          val iconComponent = ComponentName(packageName, "$packageName.${iconName}Activity")
+          pm.setComponentEnabledSetting(iconComponent, 
+              PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 
+              PackageManager.DONT_KILL_APP)
+        } catch (e: Exception) {
+          // Ignore errors for non-existent activities
+          Log.d("DynamicAppIconPlus", "Activity alias $iconName not found, skipping")
+        }
+      }
+      
+      // Now enable only the requested icon
+      if (iconIdentifier == "default") {
+        // Enable MainActivity for default icon
+        pm.setComponentEnabledSetting(mainActivity, 
             PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
             PackageManager.DONT_KILL_APP)
+        Log.i("DynamicAppIconPlus", "Icon changed to default. MainActivity is now enabled.")
       } else {
-        // In debug mode, just enable the new component without disabling MainActivity
+        // Enable the specific activity alias
         pm.setComponentEnabledSetting(newComponent, 
             PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
             PackageManager.DONT_KILL_APP)
+        Log.i("DynamicAppIconPlus", "Icon changed to $iconIdentifier. ${iconIdentifier}Activity is now enabled.")
       }
       
       // Don't restart the app - let the user restart manually
@@ -126,11 +142,29 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       
       if (mainActivityEnabled) {
         result.success("default")
-      } else {
-        // Find which custom icon is enabled
-        // This is a simplified implementation - you might want to store the current icon
-        result.success("default")
+        return
       }
+      
+      // Check each activity alias to see which one is enabled
+      val availableIcons = listOf("christmas", "halloween", "payme", "independance")
+      for (iconName in availableIcons) {
+        try {
+          val iconComponent = ComponentName(packageName, "$packageName.${iconName}Activity")
+          val iconEnabled = pm.getComponentEnabledSetting(iconComponent) == 
+              PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+          
+          if (iconEnabled) {
+            result.success(iconName)
+            return
+          }
+        } catch (e: Exception) {
+          // Ignore errors for non-existent activities
+          continue
+        }
+      }
+      
+      // If no activity is enabled, return default
+      result.success("default")
     } catch (e: Exception) {
       Log.e("DynamicAppIconPlus", "Error getting current icon: ${e.message}")
       result.error("GET_ICON_ERROR", "Failed to get current icon: ${e.message}", null)
