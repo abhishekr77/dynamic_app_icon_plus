@@ -17,10 +17,10 @@ class DynamicAppIconPlus {
   static IconConfig? _config;
   static bool _initialized = false;
 
-  /// Changes the app icon to the specified identifier.
+  /// Changes the app icon to the specified icon.
   /// 
-  /// If [iconIdentifier] is null, empty, or unknown, it will default to the default icon.
-  /// Returns `true` if the icon was successfully changed, `false` otherwise.
+  /// The [iconIdentifier] should match one of the identifiers defined in the configuration.
+  /// If the identifier is null, empty, or unknown, it will default to the default icon.
   /// 
   /// Throws a [StateError] if the plugin hasn't been initialized.
   static Future<bool> changeIcon(String? iconIdentifier) async {
@@ -43,6 +43,7 @@ class DynamicAppIconPlus {
     try {
       final bool result = await _channel.invokeMethod('changeIcon', {
         'iconIdentifier': iconIdentifier,
+        'availableIcons': availableIcons, // Pass available icons from YAML config
       });
       return result;
     } on PlatformException catch (e) {
@@ -96,7 +97,9 @@ class DynamicAppIconPlus {
   /// Returns `true` if the icon was successfully reset, `false` otherwise.
   static Future<bool> resetToDefault() async {
     try {
-      final bool result = await _channel.invokeMethod('resetToDefault');
+      final bool result = await _channel.invokeMethod('resetToDefault', {
+        'availableIcons': availableIcons, // Pass available icons from YAML config
+      });
       return result;
     } on PlatformException catch (e) {
       throw PlatformException(
@@ -114,7 +117,9 @@ class DynamicAppIconPlus {
   /// Returns `true` if the reset was successful, `false` otherwise.
   static Future<bool> resetForDevelopment() async {
     try {
-      final bool result = await _channel.invokeMethod('resetForDevelopment');
+      final bool result = await _channel.invokeMethod('resetForDevelopment', {
+        'availableIcons': availableIcons, // Pass available icons from YAML config
+      });
       return result;
     } on PlatformException catch (e) {
       throw PlatformException(
@@ -293,152 +298,6 @@ class DynamicAppIconPlus {
     );
 
     await runner.restoreAndroidManifest();
-  }
-
-  /// Uninstalls the plugin and restores the original state
-  /// This will:
-  /// 1. Remove all activity aliases from AndroidManifest.xml
-  /// 2. Delete all generated icon files from res folders
-  /// 3. Restore the original AndroidManifest.xml if backup exists
-  /// 4. Clear plugin configuration
-  static Future<bool> uninstall() async {
-    try {
-      if (!_initialized) {
-        print('⚠️  Plugin not initialized. Nothing to uninstall.');
-        return true;
-      }
-
-      print('🗑️  Uninstalling DynamicAppIconPlus...');
-
-      // Get project root (assuming we're in the app directory)
-      final projectRoot = Directory.current.path;
-      
-      // 1. Restore AndroidManifest.xml from backup if it exists
-      final manifestPath = path.join(projectRoot, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
-      final backupPath = path.join(projectRoot, 'android', 'app', 'src', 'main', 'AndroidManifest.xml.backup');
-      
-      final manifestFile = File(manifestPath);
-      final backupFile = File(backupPath);
-      
-      if (manifestFile.existsSync()) {
-        if (backupFile.existsSync()) {
-          await backupFile.copy(manifestPath);
-          print('✅ AndroidManifest.xml restored from backup');
-        } else {
-          // If no backup, remove activity aliases manually
-          await _removeActivityAliases(manifestPath);
-          print('✅ Activity aliases removed from AndroidManifest.xml');
-        }
-      } else {
-        print('ℹ️  AndroidManifest.xml not found, skipping manifest cleanup');
-      }
-
-      // 2. Delete generated icon files
-      await _removeGeneratedIcons(projectRoot);
-      print('✅ Generated icon files removed');
-
-      // 3. Clear plugin state
-      _config = null;
-      _initialized = false;
-      print('✅ Plugin configuration cleared');
-
-      print('🎉 Uninstall completed successfully!');
-      return true;
-    } catch (e) {
-      print('❌ Uninstall failed: $e');
-      return false;
-    }
-  }
-
-  /// Checks if the plugin is already set up in the current project
-  /// Returns true if activity aliases are already present in AndroidManifest.xml
-  static Future<bool> isSetup() async {
-    try {
-      final projectRoot = Directory.current.path;
-      final manifestPath = path.join(projectRoot, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
-      
-      final manifestFile = File(manifestPath);
-      if (!manifestFile.existsSync()) {
-        return false;
-      }
-
-      final content = await manifestFile.readAsString();
-      
-      // Check if activity-alias entries exist
-      return content.contains('<activity-alias') && content.contains('android:name=".');
-    } catch (e) {
-      return false;
-    }
-  }
-
-  /// Gets the list of currently configured icons from AndroidManifest.xml
-  static Future<List<String>> getConfiguredIcons() async {
-    try {
-      final projectRoot = Directory.current.path;
-      final manifestPath = path.join(projectRoot, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
-      
-      final manifestFile = File(manifestPath);
-      if (!manifestFile.existsSync()) {
-        return [];
-      }
-
-      final content = await manifestFile.readAsString();
-      
-      // Extract icon names from activity-alias entries
-      final iconNames = <String>[];
-      final regex = RegExp(r'android:name="\.(\w+)Activity"');
-      final matches = regex.allMatches(content);
-      
-      for (final match in matches) {
-        final iconName = match.group(1);
-        if (iconName != null && iconName != 'Main') {
-          iconNames.add(iconName);
-        }
-      }
-      
-      return iconNames.toSet().toList(); // Remove duplicates
-    } catch (e) {
-      return [];
-    }
-  }
-
-  /// Removes activity aliases from AndroidManifest.xml
-  static Future<void> _removeActivityAliases(String manifestPath) async {
-    final manifestFile = File(manifestPath);
-    if (!manifestFile.existsSync()) {
-      throw FileSystemException('AndroidManifest.xml not found', manifestPath);
-    }
-
-    final content = await manifestFile.readAsString();
-    
-    // Remove all activity-alias entries
-    final cleanedContent = content.replaceAllMapped(
-      RegExp(r'\s*<!-- Activity alias for .*? -->\s*<activity-alias[^>]*>.*?</activity-alias>\s*', dotAll: true),
-      (match) => '',
-    );
-
-    await manifestFile.writeAsString(cleanedContent);
-  }
-
-  /// Removes generated icon files from res folders
-  static Future<void> _removeGeneratedIcons(String projectRoot) async {
-    final resBasePath = path.join(projectRoot, 'android', 'app', 'src', 'main', 'res');
-    final densities = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi', 'xxxhdpi'];
-
-    for (final density in densities) {
-      final densityPath = path.join(resBasePath, 'mipmap-$density');
-      final densityDir = Directory(densityPath);
-      
-      if (densityDir.existsSync()) {
-        // Remove all ic_launcher_*.png files except the default ic_launcher.png
-        final files = densityDir.listSync();
-        for (final file in files) {
-          if (file is File && file.path.contains('ic_launcher_') && !file.path.endsWith('ic_launcher.png')) {
-            await file.delete();
-          }
-        }
-      }
-    }
   }
 
   /// Resets the plugin state (mainly for testing purposes)
