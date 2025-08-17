@@ -51,6 +51,7 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       "getCurrentIcon" -> getCurrentIcon(result)
       "resetToDefault" -> resetToDefault(result)
       "resetForDevelopment" -> resetForDevelopment(result)
+      "getAvailableIcons" -> getAvailableIcons(result)
       else -> result.notImplemented()
     }
   }
@@ -61,25 +62,24 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       return
     }
 
-    if (iconIdentifier == null) {
-      result.error("INVALID_ARGUMENT", "Icon identifier is required", null)
-      return
+    // Handle null, empty, or unknown icon identifiers by defaulting to "default"
+    val finalIconIdentifier = when {
+      iconIdentifier.isNullOrBlank() -> "default"
+      iconIdentifier == "default" -> "default"
+      iconIdentifier in listOf("christmas", "halloween", "payme", "independance") -> iconIdentifier
+      else -> {
+        Log.w("DynamicAppIconPlus", "Unknown icon identifier: '$iconIdentifier'. Defaulting to 'default'.")
+        "default"
+      }
     }
 
     try {
       val pm = activity!!.packageManager
       val packageName = activity!!.packageName
       
-      // Get the component name for the new icon
-      val newComponent = ComponentName(packageName, 
-          "$packageName.${iconIdentifier}Activity")
-      
-      // Check if we're in debug mode
-      val isDebug = (activity!!.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
-      
       // First, disable all activity aliases and MainActivity
       val mainActivity = ComponentName(packageName, "$packageName.MainActivity")
-      val availableIcons = listOf("christmas", "halloween", "payme", "independance") // Add your icon names here
+      val availableIcons = listOf("christmas", "halloween", "payme", "independance")
       
       // Disable MainActivity
       pm.setComponentEnabledSetting(mainActivity, 
@@ -100,7 +100,7 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       }
       
       // Now enable only the requested icon
-      if (iconIdentifier == "default") {
+      if (finalIconIdentifier == "default") {
         // Enable MainActivity for default icon
         pm.setComponentEnabledSetting(mainActivity, 
             PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
@@ -108,15 +108,16 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
         Log.i("DynamicAppIconPlus", "Icon changed to default. MainActivity is now enabled.")
       } else {
         // Enable the specific activity alias
+        val newComponent = ComponentName(packageName, "$packageName.${finalIconIdentifier}Activity")
         pm.setComponentEnabledSetting(newComponent, 
             PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
             PackageManager.DONT_KILL_APP)
-        Log.i("DynamicAppIconPlus", "Icon changed to $iconIdentifier. ${iconIdentifier}Activity is now enabled.")
+        Log.i("DynamicAppIconPlus", "Icon changed to $finalIconIdentifier. ${finalIconIdentifier}Activity is now enabled.")
       }
       
       // Don't restart the app - let the user restart manually
       // The icon change will take effect when the app is restarted
-      Log.i("DynamicAppIconPlus", "Icon changed to $iconIdentifier. Please restart the app to see the change.")
+      Log.i("DynamicAppIconPlus", "Icon changed to $finalIconIdentifier. Please restart the app to see the change.")
       
       result.success(true)
     } catch (e: Exception) {
@@ -234,6 +235,24 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
     } catch (e: Exception) {
       Log.e("DynamicAppIconPlus", "Error resetting for development: ${e.message}")
       result.error("RESET_DEV_ERROR", "Failed to reset for development: ${e.message}", null)
+    }
+  }
+
+  private fun getAvailableIcons(result: Result) {
+    if (activity == null) {
+      result.error("NO_ACTIVITY", "Activity is not available", null)
+      return
+    }
+
+    try {
+      val pm = activity!!.packageManager
+      val packageName = activity!!.packageName
+      
+      val availableIcons = listOf("christmas", "halloween", "payme", "independance")
+      result.success(availableIcons)
+    } catch (e: Exception) {
+      Log.e("DynamicAppIconPlus", "Error getting available icons: ${e.message}")
+      result.error("GET_AVAILABLE_ICONS_ERROR", "Failed to get available icons: ${e.message}", null)
     }
   }
 

@@ -17,25 +17,27 @@ class DynamicAppIconPlus {
   static IconConfig? _config;
   static bool _initialized = false;
 
-  /// Changes the app icon to the one specified by [iconIdentifier].
+  /// Changes the app icon to the specified identifier.
   /// 
-  /// The [iconIdentifier] should match one of the identifiers defined in your
-  /// configuration file.
-  /// 
+  /// If [iconIdentifier] is null, empty, or unknown, it will default to the default icon.
   /// Returns `true` if the icon was successfully changed, `false` otherwise.
   /// 
-  /// Throws a [PlatformException] if the platform doesn't support dynamic icons
-  /// or if there's an error during the icon change process.
-  /// 
   /// Throws a [StateError] if the plugin hasn't been initialized.
-  /// Throws an [ArgumentError] if the icon identifier is not valid.
-  static Future<bool> changeIcon(String iconIdentifier) async {
+  static Future<bool> changeIcon(String? iconIdentifier) async {
     if (!_initialized) {
       throw StateError('DynamicAppIconPlus has not been initialized. Call initialize() first.');
     }
     
+    // Handle null or empty icon identifier
+    if (iconIdentifier == null || iconIdentifier.trim().isEmpty) {
+      print('DynamicAppIconPlus: No icon identifier provided, defaulting to default icon');
+      iconIdentifier = 'default';
+    }
+    
+    // Check if the icon is valid (but don't throw error, just warn)
     if (!isValidIcon(iconIdentifier)) {
-      throw ArgumentError('Invalid icon identifier: $iconIdentifier. Available icons: ${availableIcons.join(', ')}');
+      print('DynamicAppIconPlus: Unknown icon identifier "$iconIdentifier", defaulting to default icon');
+      iconIdentifier = 'default';
     }
     
     try {
@@ -74,6 +76,18 @@ class DynamicAppIconPlus {
       return result;
     } on PlatformException {
       return null;
+    }
+  }
+
+  /// Gets the list of available icon identifiers from the platform.
+  /// 
+  /// Returns a list of icon identifiers that are available on the current platform.
+  static Future<List<String>> getAvailableIconsFromPlatform() async {
+    try {
+      final List<dynamic> result = await _channel.invokeMethod('getAvailableIcons');
+      return result.cast<String>();
+    } on PlatformException {
+      return [];
     }
   }
 

@@ -79,6 +79,9 @@ void main() async {
   // Initialize the plugin
   await DynamicAppIconPlus.initialize('icon_config.yaml');
   
+  // For development: reset all activities to enabled state
+  await DynamicAppIconPlus.resetForDevelopment();
+  
   runApp(MyApp());
 }
 
@@ -92,6 +95,18 @@ await DynamicAppIconPlus.resetToDefault();
 String currentIcon = await DynamicAppIconPlus.getCurrentIcon();
 ```
 
+## Development Workflow
+
+### During Development:
+1. **Always call `resetForDevelopment()`** after initialization to keep all activities enabled
+2. **Test icon changes** by calling `changeIcon()`
+3. **Restart the app** to see the icon change
+4. **If you can't run the app**, call `resetForDevelopment()` again
+
+### For Production:
+1. **Remove the `resetForDevelopment()` call** from your production code
+2. **Icon changes will work normally** with proper activity switching
+
 ## That's It! 🎉
 
 No manual registration, no complex setup - just add the dependency, create a config file, run the setup tool, and you're ready to go!
@@ -103,8 +118,10 @@ No manual registration, no complex setup - just add the dependency, create a con
 #### `initialize(String configPath)`
 Initializes the plugin with a configuration file.
 
-#### `changeIcon(String iconIdentifier)`
+#### `changeIcon(String? iconIdentifier)`
 Changes the app icon to the specified identifier.
+- If `iconIdentifier` is null, empty, or unknown, it defaults to the default icon
+- No errors are thrown for invalid icons - they automatically fallback to default
 
 #### `resetToDefault()`
 Resets the app icon to the default icon.
@@ -115,13 +132,34 @@ Gets the currently active icon identifier.
 #### `isSupported()`
 Checks if the current platform supports dynamic app icons.
 
+#### `resetForDevelopment()`
+Resets all activities to enabled state for development.
+
+#### `getAvailableIconsFromPlatform()`
+Gets the list of available icon identifiers from the platform.
+
 ### Properties
 
 #### `availableIcons`
-Gets a list of all available icon identifiers.
+Gets a list of all available icon identifiers from the configuration.
 
 #### `isInitialized`
 Checks if the plugin has been initialized.
+
+## Error Handling
+
+The plugin now provides graceful error handling:
+
+```dart
+// These all work and default to the default icon
+await DynamicAppIconPlus.changeIcon(null);
+await DynamicAppIconPlus.changeIcon('');
+await DynamicAppIconPlus.changeIcon('unknown_icon');
+await DynamicAppIconPlus.changeIcon('invalid');
+
+// This works normally
+await DynamicAppIconPlus.changeIcon('christmas');
+```
 
 ## Configuration Format
 
