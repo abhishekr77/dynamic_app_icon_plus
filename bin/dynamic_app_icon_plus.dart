@@ -1,12 +1,14 @@
 #!/usr/bin/env dart
 
 import 'dart:io';
+import 'dart:async';
 import 'package:path/path.dart' as path;
+
 import '../lib/src/icon_config.dart';
 import '../lib/src/build_config_generator.dart';
-import '../lib/dynamic_app_icon_plus.dart';
 
 /// Command-line tool for setting up dynamic app icons
+/// This tool can run setup or uninstall operations
 void main(List<String> args) async {
   if (args.isEmpty) {
     print('Usage: dart run dynamic_app_icon_plus:dynamic_app_icon_plus <config_file>');
@@ -33,7 +35,7 @@ Future<void> _uninstall() async {
   print('');
 
   try {
-    final success = await DynamicAppIconPlus.uninstall();
+    final success = await _performUninstall();
     if (success) {
       print('');
       print('✅ Uninstall completed successfully!');
@@ -49,6 +51,128 @@ Future<void> _uninstall() async {
   }
 }
 
+Future<bool> _performUninstall() async {
+  try {
+    final projectRoot = Directory.current.path;
+    
+    // 1. Restore AndroidManifest.xml from backup if it exists
+    final manifestPath = path.join(projectRoot, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
+    final backupPath = path.join(projectRoot, 'android', 'app', 'src', 'main', 'AndroidManifest.xml.backup');
+    
+    final manifestFile = File(manifestPath);
+    final backupFile = File(backupPath);
+    
+    if (manifestFile.existsSync()) {
+      if (backupFile.existsSync()) {
+        await backupFile.copy(manifestPath);
+        print('✅ AndroidManifest.xml restored from backup');
+      } else {
+        // If no backup, remove activity aliases manually
+        await _removeActivityAliases(manifestPath);
+        print('✅ Activity aliases removed from AndroidManifest.xml');
+      }
+    } else {
+      print('ℹ️  AndroidManifest.xml not found, skipping manifest cleanup');
+    }
+
+    // 2. Delete generated icon files
+    await _removeGeneratedIcons(projectRoot);
+    print('✅ Generated icon files removed');
+
+    print('🎉 Uninstall completed successfully!');
+    return true;
+  } catch (e) {
+    print('❌ Uninstall failed: $e');
+    return false;
+  }
+}
+
+Future<void> _removeActivityAliases(String manifestPath) async {
+  final manifestFile = File(manifestPath);
+  if (!manifestFile.existsSync()) {
+    throw FileSystemException('AndroidManifest.xml not found', manifestPath);
+  }
+
+  final content = await manifestFile.readAsString();
+  
+  // Remove all activity-alias entries
+  final cleanedContent = content.replaceAllMapped(
+    RegExp(r'\s*<!-- Activity alias for .*? -->\s*<activity-alias[^>]*>.*?</activity-alias>\s*', dotAll: true),
+    (match) => '',
+  );
+
+  await manifestFile.writeAsString(cleanedContent);
+}
+
+Future<void> _removeGeneratedIcons(String projectRoot) async {
+  final resBasePath = path.join(projectRoot, 'android', 'app', 'src', 'main', 'res');
+  final densities = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi', 'xxxhdpi'];
+
+  for (final density in densities) {
+    final densityPath = path.join(resBasePath, 'mipmap-$density');
+    final densityDir = Directory(densityPath);
+    
+    if (densityDir.existsSync()) {
+      // Remove all ic_launcher_*.png files except the default ic_launcher.png
+      final files = densityDir.listSync();
+      for (final file in files) {
+        if (file is File && file.path.contains('ic_launcher_') && !file.path.endsWith('ic_launcher.png')) {
+          await file.delete();
+        }
+      }
+    }
+  }
+}
+
+Future<bool> _isSetup() async {
+  try {
+    final projectRoot = Directory.current.path;
+    final manifestPath = path.join(projectRoot, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
+    
+    final manifestFile = File(manifestPath);
+    if (!manifestFile.existsSync()) {
+      return false;
+    }
+
+    final content = await manifestFile.readAsString();
+    
+    // Check if activity-alias entries exist
+    return content.contains('<activity-alias') && content.contains('android:name=".');
+  } catch (e) {
+    return false;
+  }
+}
+
+Future<List<String>> _getConfiguredIcons() async {
+  try {
+    final projectRoot = Directory.current.path;
+    final manifestPath = path.join(projectRoot, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
+    
+    final manifestFile = File(manifestPath);
+    if (!manifestFile.existsSync()) {
+      return [];
+    }
+
+    final content = await manifestFile.readAsString();
+    
+    // Extract icon names from activity-alias entries
+    final iconNames = <String>[];
+    final regex = RegExp(r'android:name="\.(\w+)Activity"');
+    final matches = regex.allMatches(content);
+    
+    for (final match in matches) {
+      final iconName = match.group(1);
+      if (iconName != null && iconName != 'Main') {
+        iconNames.add(iconName);
+      }
+    }
+    
+    return iconNames.toSet().toList(); // Remove duplicates
+  } catch (e) {
+    return [];
+  }
+}
+
 Future<void> _setup(String configFile) async {
   final projectRoot = Directory.current.path;
   
@@ -58,9 +182,9 @@ Future<void> _setup(String configFile) async {
 
   try {
     // Check if already set up
-    final isAlreadySetup = await DynamicAppIconPlus.isSetup();
+    final isAlreadySetup = await _isSetup();
     if (isAlreadySetup) {
-      final configuredIcons = await DynamicAppIconPlus.getConfiguredIcons();
+      final configuredIcons = await _getConfiguredIcons();
       print('⚠️  Plugin is already set up!');
       print('   Currently configured icons: ${configuredIcons.join(', ')}');
       print('');
