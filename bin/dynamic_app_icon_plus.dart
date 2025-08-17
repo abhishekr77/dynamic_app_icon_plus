@@ -67,6 +67,10 @@ void main(List<String> args) async {
       print('');
     }
 
+    // Copy icon files to res folders
+    await generator.copyIconsToRes();
+    print('');
+
     // Generate Android manifest modifications
     print('📱 Setting up Android manifest...');
     try {
