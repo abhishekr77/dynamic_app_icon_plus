@@ -37,9 +37,12 @@ dependencies:
 Create `icon_config.yaml` in your project root:
 
 ```yaml
+# The default_icon must reference an icon defined in the icons section below
+# You can use any icon name as the default_icon
 default_icon: "independance"
 
 icons:
+  # Icon names are completely dynamic - you can use any names you want
   default:
     path: "assets/images/launcher_icon.png"
     label: "Default Icon"
@@ -52,6 +55,13 @@ icons:
     path: "assets/images/pay.png"
     label: "PayMe Icon"
     description: "Payment-themed app icon"
+  # You can add as many icons as you want with any names
+  christmas:
+    path: "assets/images/christmas.png"
+    label: "Christmas Icon"
+  halloween:
+    path: "assets/images/halloween.png"
+    label: "Halloween Icon"
 ```
 
 ### 3. Run the setup tool
@@ -150,36 +160,45 @@ await DynamicAppIconPlus.changeIcon('christmas');
 
 ## Configuration Format
 
+### Key Points:
+- **`default_icon`** is mandatory and must reference an icon defined in the `icons` section
+- **Icon names are completely dynamic** - you can use any names you want
+- **`default_icon` acts as a fallback** - if an invalid icon is passed, it falls back to the `default_icon`
+
 ### Simple Format
 ```yaml
-default_icon: "default"
+# You can use any icon name as default_icon
+default_icon: "my_favorite_icon"
 
 icons:
-  default: "assets/icons/default.png"
+  my_favorite_icon: "assets/icons/favorite.png"
   christmas: "assets/icons/christmas.png"
   halloween: "assets/icons/halloween.png"
+  # Add as many icons as you want with any names
+  custom_icon_1: "assets/icons/custom1.png"
+  custom_icon_2: "assets/icons/custom2.png"
 ```
 
 ### Advanced Format
 ```yaml
-default_icon: "default"
+# You can use any icon name as default_icon
+default_icon: "my_favorite_icon"
 
 icons:
-  default:
-    path: "assets/icons/default.png"
-    label: "Default Icon"
-    description: "The default app icon"
-  
+  my_favorite_icon:
+    path: "assets/icons/favorite.png"
+    label: "My Favorite Icon"
+    description: "This is my favorite app icon"
   christmas:
     path: "assets/icons/christmas.png"
-    sizes:
-      mdpi: "assets/icons/christmas_48x48.png"
-      hdpi: "assets/icons/christmas_72x72.png"
-      xhdpi: "assets/icons/christmas_96x96.png"
-      xxhdpi: "assets/icons/christmas_144x144.png"
-      xxxhdpi: "assets/icons/christmas_192x192.png"
     label: "Christmas Icon"
     description: "Festive Christmas-themed app icon"
+    sizes:
+      xxhdpi: "assets/icons/christmas_xxhdpi.png"
+  halloween:
+    path: "assets/icons/halloween.png"
+    label: "Halloween Icon"
+    description: "Spooky Halloween-themed app icon"
 ```
 
 ### Advanced Format with Specific Resolutions
