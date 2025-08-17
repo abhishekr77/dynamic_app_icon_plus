@@ -46,13 +46,15 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       "changeIcon" -> {
         val iconIdentifier = call.argument<String>("iconIdentifier")
         val availableIcons = call.argument<List<String>>("availableIcons") ?: listOf()
-        changeIcon(iconIdentifier, availableIcons, result)
+        val defaultIcon = call.argument<String>("defaultIcon") ?: "default"
+        changeIcon(iconIdentifier, availableIcons, defaultIcon, result)
       }
       "isSupported" -> result.success(true) // Android supports dynamic icons
       "getCurrentIcon" -> getCurrentIcon(result)
       "resetToDefault" -> {
         val availableIcons = call.argument<List<String>>("availableIcons") ?: listOf()
-        resetToDefault(availableIcons, result)
+        val defaultIcon = call.argument<String>("defaultIcon") ?: "default"
+        resetToDefault(availableIcons, defaultIcon, result)
       }
       "resetForDevelopment" -> {
         val availableIcons = call.argument<List<String>>("availableIcons") ?: listOf()
@@ -63,20 +65,20 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
     }
   }
 
-  private fun changeIcon(iconIdentifier: String?, availableIcons: List<String>, result: Result) {
+  private fun changeIcon(iconIdentifier: String?, availableIcons: List<String>, defaultIcon: String, result: Result) {
     if (activity == null) {
       result.error("NO_ACTIVITY", "Activity is not available", null)
       return
     }
 
-    // Handle null, empty, or unknown icon identifiers by defaulting to "default"
+    // Handle null, empty, or unknown icon identifiers by defaulting to configured default icon
     val finalIconIdentifier = when {
-      iconIdentifier.isNullOrBlank() -> "default"
-      iconIdentifier == "default" -> "default"
+      iconIdentifier.isNullOrBlank() -> defaultIcon
+      iconIdentifier == "default" -> defaultIcon // "default" now refers to the configured default icon
       iconIdentifier in availableIcons -> iconIdentifier // Use dynamic list from YAML
       else -> {
-        Log.w("DynamicAppIconPlus", "Unknown icon identifier: '$iconIdentifier'. Available icons: ${availableIcons.joinToString()}. Defaulting to 'default'.")
-        "default"
+        Log.w("DynamicAppIconPlus", "Unknown icon identifier: '$iconIdentifier'. Available icons: ${availableIcons.joinToString()}. Defaulting to configured default: '$defaultIcon'.")
+        defaultIcon
       }
     }
 
@@ -106,14 +108,14 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       }
       
       // Now enable only the requested icon
-      if (finalIconIdentifier == "default") {
-        // Check if default activity alias exists
+      if (finalIconIdentifier == defaultIcon) {
+        // Enable the default activity alias for the configured default icon
         try {
-          val defaultComponent = ComponentName(packageName, "$packageName.defaultActivity")
+          val defaultComponent = ComponentName(packageName, "$packageName.${defaultIcon}Activity")
           pm.setComponentEnabledSetting(defaultComponent, 
               PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
               PackageManager.DONT_KILL_APP)
-          Log.i("DynamicAppIconPlus", "Icon changed to default. defaultActivity is now enabled.")
+          Log.i("DynamicAppIconPlus", "Icon changed to configured default: $defaultIcon. ${defaultIcon}Activity is now enabled.")
         } catch (e: Exception) {
           // If default activity alias doesn't exist, enable MainActivity
           Log.w("DynamicAppIconPlus", "Default activity alias not found, enabling MainActivity instead")
@@ -207,7 +209,7 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
     }
   }
 
-  private fun resetToDefault(availableIcons: List<String>, result: Result) {
+  private fun resetToDefault(availableIcons: List<String>, defaultIcon: String, result: Result) {
     if (activity == null) {
       result.error("NO_ACTIVITY", "Activity is not available", null)
       return
@@ -231,15 +233,26 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
         }
       }
       
-      // Now enable MainActivity for default icon
-      val mainActivity = ComponentName(packageName, "$packageName.MainActivity")
-      pm.setComponentEnabledSetting(mainActivity, 
-          PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
-          PackageManager.DONT_KILL_APP)
+      // Now enable the configured default icon
+      try {
+        val defaultComponent = ComponentName(packageName, "$packageName.${defaultIcon}Activity")
+        pm.setComponentEnabledSetting(defaultComponent, 
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
+            PackageManager.DONT_KILL_APP)
+        Log.i("DynamicAppIconPlus", "Icon reset to configured default: $defaultIcon. ${defaultIcon}Activity is now enabled.")
+      } catch (e: Exception) {
+        // If default activity alias doesn't exist, enable MainActivity
+        Log.w("DynamicAppIconPlus", "Default activity alias not found, enabling MainActivity instead")
+        val mainActivity = ComponentName(packageName, "$packageName.MainActivity")
+        pm.setComponentEnabledSetting(mainActivity, 
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
+            PackageManager.DONT_KILL_APP)
+        Log.i("DynamicAppIconPlus", "Icon reset to default. MainActivity is now enabled.")
+      }
       
       // Don't restart the app - let the user restart manually
       // The icon change will take effect when the app is restarted
-      Log.i("DynamicAppIconPlus", "Icon reset to default. MainActivity is now enabled.")
+      Log.i("DynamicAppIconPlus", "Icon reset to configured default: $defaultIcon. Please restart the app to see the change.")
       
       result.success(true)
     } catch (e: Exception) {

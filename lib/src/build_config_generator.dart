@@ -123,15 +123,15 @@ class BuildConfigGenerator {
 
   /// Updates the MainActivity to use the default icon
   String _updateMainActivityIcon(String manifestContent) {
-    // Check if there's a default icon defined
+    // Check if there's a default icon defined and it's "default"
     final defaultIcon = config.icons['default'];
-    if (defaultIcon != null) {
+    if (defaultIcon != null && config.defaultIcon == 'default') {
       // Update the application icon to use the default icon
       final appIconPattern = RegExp(r'android:icon="@mipmap/ic_launcher"');
       final replacement = 'android:icon="@mipmap/ic_launcher_default"';
       return manifestContent.replaceFirst(appIconPattern, replacement);
     } else {
-      // If no default icon, revert to original ic_launcher
+      // If no default icon or default icon is not "default", revert to original ic_launcher
       final appIconPattern = RegExp(r'android:icon="@mipmap/ic_launcher_default"');
       final replacement = 'android:icon="@mipmap/ic_launcher"';
       return manifestContent.replaceFirst(appIconPattern, replacement);
@@ -150,7 +150,7 @@ class BuildConfigGenerator {
       buffer.writeln('            android:exported="true"');
       
       // Use different icon reference for default
-      if (icon.identifier == 'default') {
+      if (icon.identifier == 'default' && config.defaultIcon == 'default') {
         buffer.writeln('            android:icon="@mipmap/ic_launcher_default"');
       } else {
         buffer.writeln('            android:icon="@mipmap/ic_launcher_${icon.identifier}"');
@@ -276,7 +276,8 @@ void main() async {
         }
         
         // For default icon, create a separate file to avoid overwriting original ic_launcher.png
-        final targetFileName = icon.identifier == 'default' 
+        // But only if the default icon is actually "default", otherwise treat it as a regular icon
+        final targetFileName = (icon.identifier == 'default' && config.defaultIcon == 'default') 
             ? 'ic_launcher_default.png' 
             : 'ic_launcher_${icon.identifier}.png';
         final targetPath = path.join(densityPath, targetFileName);

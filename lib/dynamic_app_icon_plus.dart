@@ -20,7 +20,7 @@ class DynamicAppIconPlus {
   /// Changes the app icon to the specified icon.
   /// 
   /// The [iconIdentifier] should match one of the identifiers defined in the configuration.
-  /// If the identifier is null, empty, or unknown, it will default to the default icon.
+  /// If the identifier is null, empty, or unknown, it will default to the configured default icon.
   /// 
   /// Throws a [StateError] if the plugin hasn't been initialized.
   static Future<bool> changeIcon(String? iconIdentifier) async {
@@ -30,20 +30,23 @@ class DynamicAppIconPlus {
     
     // Handle null or empty icon identifier
     if (iconIdentifier == null || iconIdentifier.trim().isEmpty) {
-      print('DynamicAppIconPlus: No icon identifier provided, defaulting to default icon');
-      iconIdentifier = 'default';
+      final defaultIcon = _config?.defaultIcon ?? 'default';
+      print('DynamicAppIconPlus: No icon identifier provided, defaulting to configured default icon: $defaultIcon');
+      iconIdentifier = defaultIcon;
     }
     
     // Check if the icon is valid (but don't throw error, just warn)
     if (!isValidIcon(iconIdentifier)) {
-      print('DynamicAppIconPlus: Unknown icon identifier "$iconIdentifier", defaulting to default icon');
-      iconIdentifier = 'default';
+      final defaultIcon = _config?.defaultIcon ?? 'default';
+      print('DynamicAppIconPlus: Unknown icon identifier "$iconIdentifier", defaulting to configured default icon: $defaultIcon');
+      iconIdentifier = defaultIcon;
     }
     
     try {
       final bool result = await _channel.invokeMethod('changeIcon', {
         'iconIdentifier': iconIdentifier,
         'availableIcons': availableIcons, // Pass available icons from YAML config
+        'defaultIcon': _config?.defaultIcon ?? 'default', // Pass configured default icon
       });
       return result;
     } on PlatformException catch (e) {
@@ -99,6 +102,7 @@ class DynamicAppIconPlus {
     try {
       final bool result = await _channel.invokeMethod('resetToDefault', {
         'availableIcons': availableIcons, // Pass available icons from YAML config
+        'defaultIcon': _config?.defaultIcon ?? 'default', // Pass configured default icon
       });
       return result;
     } on PlatformException catch (e) {
