@@ -22,41 +22,7 @@
             </intent-filter>
         </activity>
         
-        <!-- Activity aliases for custom icons -->
-        <activity-alias
-            android:name=".christmasActivity"
-            android:enabled="false"
-            android:icon="@mipmap/ic_launcher_christmas"
-            android:targetActivity=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-        
-        <activity-alias
-            android:name=".halloweenActivity"
-            android:enabled="false"
-            android:icon="@mipmap/ic_launcher_halloween"
-            android:targetActivity=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-        
-        <activity-alias
-            android:name=".new_yearActivity"
-            android:enabled="false"
-            android:icon="@mipmap/ic_launcher_new_year"
-            android:targetActivity=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity-alias>
-        
-        <meta-data
+        <!-- Activity aliases for custom icons --><meta-data
             android:name="flutterEmbedding"
             android:value="2" />
         <meta-data

@@ -6,7 +6,7 @@ void main() async {
   
   // Automatic setup and initialization
   try {
-    await DynamicAppIconPlus.setup('example_config.yaml');
+    await DynamicAppIconPlus.setup('../test_config.yaml');
     print('Plugin setup and initialized successfully');
   } catch (e) {
     print('Failed to setup plugin: $e');

@@ -41,10 +41,19 @@ class BuildConfigGenerator {
   /// Removes existing activity aliases from the manifest content
   String _removeExistingActivityAliases(String content) {
     // Remove all activity-alias entries and their comments
-    return content.replaceAllMapped(
+    // First, remove activity aliases with comments
+    var cleanedContent = content.replaceAllMapped(
       RegExp(r'\s*<!-- Activity alias for .*? -->\s*<activity-alias[^>]*>.*?</activity-alias>\s*', dotAll: true),
       (match) => '',
     );
+    
+    // Then, remove any remaining activity-alias entries without comments
+    cleanedContent = cleanedContent.replaceAllMapped(
+      RegExp(r'\s*<activity-alias[^>]*>.*?</activity-alias>\s*', dotAll: true),
+      (match) => '',
+    );
+    
+    return cleanedContent;
   }
 
   /// Injects activity aliases into the AndroidManifest.xml
