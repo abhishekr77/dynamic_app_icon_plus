@@ -19,7 +19,7 @@ void main() async {
   print('✓ Activity aliases will be generated automatically');
   print('✓ Make sure to add your icon files to the appropriate mipmap folders');
   print('');
-  print('Available icons: default, independance, payme, diwali');
+  print('Available icons: default, christmas, halloween, new_year');
   print('');
   print('Setup complete! You can now use DynamicAppIconPlus.changeIcon() in your app.');
 }
