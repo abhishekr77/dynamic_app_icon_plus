@@ -18,67 +18,82 @@ Add this to your package's `pubspec.yaml` file:
 dependencies:
   dynamic_app_icon_plus:
     git:
-      url: https://github.com/abhishekr77/dynamic_app_icon_plus
+      url: https://github.com/yourusername/dynamic_app_icon_plus
       ref: main
 ```
 
 ## Quick Start
 
-### 1. Create Configuration File
+### 1. Add the dependency
+```yaml
+dependencies:
+  dynamic_app_icon_plus:
+    git:
+      url: https://github.com/yourusername/dynamic_app_icon_plus
+      ref: main
+```
 
+### 2. Create a configuration file
 Create `icon_config.yaml` in your project root:
 
 ```yaml
-default_icon: "default"
+default_icon: "independance"
 
 icons:
   default:
-    path: "assets/icons/default_icon.png"
+    path: "assets/images/launcher_icon.png"
     label: "Default Icon"
     description: "The default app icon"
-
-  christmas:
-    path: "assets/icons/christmas_icon.png"
-    label: "Christmas Icon"
-    description: "Festive Christmas-themed app icon"
-
-  halloween:
-    path: "assets/icons/halloween_icon.png"
-    label: "Halloween Icon"
-    description: "Spooky Halloween-themed app icon"
+  independance:
+    path: "assets/images/card2.png"
+    label: "Independence Icon"
+    description: "Festive independence-themed app icon"
+  payme:
+    path: "assets/images/pay.png"
+    label: "PayMe Icon"
+    description: "Payment-themed app icon"
 ```
 
-### 2. Run Setup Tool
-
+### 3. Run the setup tool
 ```bash
-dart run dynamic_app_icon_plus:dynamic_app_icon_plus icon_config.yaml
+dart run dynamic_app_icon_plus:setup icon_config.yaml
 ```
 
-This will automatically:
-- **Copy your icon files** from assets to the appropriate res folders
-- Update your Android manifest
-- Generate build scripts
-- Create documentation
-
-### 3. That's It! 🎉
-
-The setup tool now automatically copies your icon files from the paths specified in your YAML to the correct Android res folders. No manual copying needed!
-
-### 4. Use in Your App
-
+### 4. Initialize in your app
 ```dart
 import 'package:dynamic_app_icon_plus/dynamic_app_icon_plus.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize the plugin
-  await DynamicAppIconPlus.initialize('icon_config.yaml');
-  
-  // For development: reset all activities to enabled state
-  await DynamicAppIconPlus.resetForDevelopment();
+  // Initialize without auto-setting default icon (prevents crashes)
+  await DynamicAppIconPlus.initialize('icon_config.yaml', setDefaultIcon: false);
   
   runApp(MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Set default icon after app is fully loaded
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await DynamicAppIconPlus.setDefaultIcon();
+    });
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'My App',
+      home: MyHomePage(),
+    );
+  }
 }
 
 // Change icon

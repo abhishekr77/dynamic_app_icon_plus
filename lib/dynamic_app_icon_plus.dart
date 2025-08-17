@@ -144,7 +144,7 @@ class DynamicAppIconPlus {
   /// 1. As an absolute path
   /// 2. In the app's assets (if added to pubspec.yaml)
   /// 3. In the app's documents directory
-  static Future<void> initialize(String configPath, {bool validateFiles = true, bool setDefaultIcon = true}) async {
+  static Future<void> initialize(String configPath, {bool validateFiles = true, bool setDefaultIcon = false}) async {
     try {
       // Try to find the config file in multiple locations
       String? actualPath;
@@ -286,10 +286,10 @@ class DynamicAppIconPlus {
   /// 1. Load the configuration from the specified file
   /// 2. Generate Android manifest modifications
   /// 3. Create build scripts and documentation
-  /// 4. Automatically set the default icon (enabled by default for proper first boot behavior)
+  /// 4. Automatically set the default icon (disabled by default to prevent crashes)
   /// 
   /// This is a convenience method that combines initialization and setup.
-  static Future<void> setup(String configPath, {bool setDefaultIcon = true}) async {
+  static Future<void> setup(String configPath, {bool setDefaultIcon = false}) async {
     final projectRoot = Directory.current.path;
     final runner = DynamicAppIconPlusBuildRunner(
       projectRoot: projectRoot,
