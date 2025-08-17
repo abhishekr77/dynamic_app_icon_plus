@@ -12,7 +12,7 @@ class BuildConfigGenerator {
     required this.projectRoot,
   });
 
-  /// Generates the Android manifest modifications
+  /// Generates Android manifest modifications
   Future<void> generateAndroidManifest() async {
     final manifestPath = path.join(projectRoot, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
     final manifestFile = File(manifestPath);
@@ -21,10 +21,30 @@ class BuildConfigGenerator {
       throw FileSystemException('AndroidManifest.xml not found', manifestPath);
     }
 
-    final manifestContent = await manifestFile.readAsString();
-    final modifiedContent = _injectActivityAliases(manifestContent);
+    // Create backup first
+    final backupPath = path.join(projectRoot, 'android', 'app', 'src', 'main', 'AndroidManifest.xml.backup');
+    if (!File(backupPath).existsSync()) {
+      await manifestFile.copy(backupPath);
+    }
+
+    final content = await manifestFile.readAsString();
+    
+    // Remove existing activity aliases to prevent duplicates
+    final cleanedContent = _removeExistingActivityAliases(content);
+    
+    // Inject new activity aliases
+    final modifiedContent = _injectActivityAliases(cleanedContent);
     
     await manifestFile.writeAsString(modifiedContent);
+  }
+
+  /// Removes existing activity aliases from the manifest content
+  String _removeExistingActivityAliases(String content) {
+    // Remove all activity-alias entries and their comments
+    return content.replaceAllMapped(
+      RegExp(r'\s*<!-- Activity alias for .*? -->\s*<activity-alias[^>]*>.*?</activity-alias>\s*', dotAll: true),
+      (match) => '',
+    );
   }
 
   /// Injects activity aliases into the AndroidManifest.xml

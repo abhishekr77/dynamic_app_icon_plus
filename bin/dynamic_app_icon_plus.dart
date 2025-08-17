@@ -4,22 +4,52 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import '../lib/src/icon_config.dart';
 import '../lib/src/build_config_generator.dart';
+import '../lib/dynamic_app_icon_plus.dart';
 
 /// Command-line tool for setting up dynamic app icons
 void main(List<String> args) async {
   if (args.isEmpty) {
-    print('Usage: dart run dynamic_app_icon_plus:dynamic_app_icon_plus [config_file]');
+    print('Usage: dart run dynamic_app_icon_plus:dynamic_app_icon_plus <config_file>');
+    print('   or: dart run dynamic_app_icon_plus:dynamic_app_icon_plus uninstall');
     print('');
-    print('Options:');
-    print('  config_file    Path to the YAML configuration file (default: icon_config.yaml)');
-    print('');
-    print('Examples:');
-    print('  dart run dynamic_app_icon_plus:dynamic_app_icon_plus');
-    print('  dart run dynamic_app_icon_plus:dynamic_app_icon_plus my_icons.yaml');
+    print('Commands:');
+    print('  <config_file>  Setup dynamic app icons using the specified YAML config file');
+    print('  uninstall      Remove the plugin and restore original state');
     exit(1);
   }
 
-  final configFile = args.first;
+  final command = args.first;
+  
+  if (command == 'uninstall') {
+    await _uninstall();
+  } else {
+    await _setup(command);
+  }
+}
+
+Future<void> _uninstall() async {
+  print('🗑️  Dynamic App Icons Uninstall');
+  print('===============================');
+  print('');
+
+  try {
+    final success = await DynamicAppIconPlus.uninstall();
+    if (success) {
+      print('');
+      print('✅ Uninstall completed successfully!');
+      print('The plugin has been removed and your project restored to its original state.');
+    } else {
+      print('');
+      print('❌ Uninstall failed. Please check the error messages above.');
+      exit(1);
+    }
+  } catch (e) {
+    print('❌ Uninstall failed: $e');
+    exit(1);
+  }
+}
+
+Future<void> _setup(String configFile) async {
   final projectRoot = Directory.current.path;
   
   print('🎨 Dynamic App Icons Setup');
@@ -27,6 +57,24 @@ void main(List<String> args) async {
   print('');
 
   try {
+    // Check if already set up
+    final isAlreadySetup = await DynamicAppIconPlus.isSetup();
+    if (isAlreadySetup) {
+      final configuredIcons = await DynamicAppIconPlus.getConfiguredIcons();
+      print('⚠️  Plugin is already set up!');
+      print('   Currently configured icons: ${configuredIcons.join(', ')}');
+      print('');
+      print('Options:');
+      print('1. Run setup again (will overwrite existing configuration)');
+      print('2. Uninstall plugin (run: dart run dynamic_app_icon_plus:uninstall)');
+      print('3. Exit');
+      print('');
+      
+      // For now, we'll continue with setup but warn the user
+      print('Continuing with setup (existing configuration will be overwritten)...');
+      print('');
+    }
+
     // Load configuration
     print('📋 Loading configuration from $configFile...');
     final config = IconConfig.fromYamlFile(configFile);
@@ -100,19 +148,16 @@ void main(List<String> args) async {
     print('🎉 Setup completed successfully!');
     print('');
     print('Next steps:');
-    print('1. Add your icon files to the appropriate mipmap folders:');
-    print('   - android/app/src/main/res/mipmap-hdpi/');
-    print('   - android/app/src/main/res/mipmap-mdpi/');
-    print('   - android/app/src/main/res/mipmap-xhdpi/');
-    print('   - android/app/src/main/res/mipmap-xxhdpi/');
-    print('   - android/app/src/main/res/mipmap-xxxhdpi/');
-    print('');
-    print('2. Initialize the plugin in your app:');
+    print('1. Icons have been automatically copied to res folders');
+    print('2. Android manifest has been updated');
+    print('3. Initialize the plugin in your app:');
     print('   await DynamicAppIconPlus.initialize(\'$configFile\');');
     print('');
-    print('3. Use the plugin to change icons:');
+    print('4. Use the plugin to change icons:');
     print('   await DynamicAppIconPlus.changeIcon(\'${config.availableIcons.first}\');');
     print('');
+    print('To uninstall the plugin later, run:');
+    print('   dart run dynamic_app_icon_plus:uninstall');
 
   } catch (e) {
     print('❌ Setup failed: $e');
