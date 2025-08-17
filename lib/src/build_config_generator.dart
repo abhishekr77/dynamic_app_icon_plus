@@ -21,27 +21,122 @@ class BuildConfigGenerator {
       throw FileSystemException('AndroidManifest.xml not found', manifestPath);
     }
 
+    // Backup the current manifest
+    await _backupManifest(manifestPath);
+
     final manifestContent = await manifestFile.readAsString();
     final modifiedContent = _injectActivityAliases(manifestContent);
     
     await manifestFile.writeAsString(modifiedContent);
   }
 
+  /// Backs up the current AndroidManifest.xml
+  Future<void> _backupManifest(String manifestPath) async {
+    final backupPath = '$manifestPath.backup';
+    final manifestFile = File(manifestPath);
+    final backupFile = File(backupPath);
+    
+    if (manifestFile.existsSync()) {
+      await manifestFile.copy(backupPath);
+      print('📋 Backed up AndroidManifest.xml to AndroidManifest.xml.backup');
+    }
+  }
+
+  /// Cleans up old activity aliases and icon files
+  Future<void> cleanupOldIcons() async {
+    print('🧹 Cleaning up old icons and activity aliases...');
+    
+    final resBasePath = path.join(projectRoot, 'android', 'app', 'src', 'main', 'res');
+    final densities = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi', 'xxxhdpi'];
+    
+    // Get current icon identifiers from config
+    final currentIcons = config.icons.keys.toSet();
+    
+    // Clean up icon files
+    for (final density in densities) {
+      final densityPath = path.join(resBasePath, 'mipmap-$density');
+      final densityDir = Directory(densityPath);
+      
+      if (!densityDir.existsSync()) continue;
+      
+      // List all ic_launcher files in this density folder
+      final files = densityDir.listSync().whereType<File>();
+      
+      for (final file in files) {
+        final fileName = path.basename(file.path);
+        
+        // Check if it's a dynamic icon file (ic_launcher_*.png)
+        if (fileName.startsWith('ic_launcher_') && fileName.endsWith('.png')) {
+          final iconName = fileName.substring(12, fileName.length - 4); // Remove 'ic_launcher_' and '.png'
+          
+          // If this icon is no longer in the config, remove it
+          if (!currentIcons.contains(iconName)) {
+            try {
+              await file.delete();
+              print('🗑️  Removed old icon file: mipmap-$density/$fileName');
+            } catch (e) {
+              print('⚠️  Failed to remove old icon file: $fileName - $e');
+            }
+          }
+        }
+      }
+    }
+    
+    print('✅ Cleanup completed!');
+  }
+
   /// Injects activity aliases into the AndroidManifest.xml
   String _injectActivityAliases(String manifestContent) {
+    // First, remove all existing activity aliases
+    final cleanedContent = _removeExistingActivityAliases(manifestContent);
+    
+    // Update the MainActivity to use the default icon (if it exists)
+    final updatedContent = _updateMainActivityIcon(cleanedContent);
+    
+    // Generate new activity aliases
     final activityAliases = _generateActivityAliases();
     
     // Find the closing </application> tag
-    final applicationEndIndex = manifestContent.lastIndexOf('</application>');
+    final applicationEndIndex = updatedContent.lastIndexOf('</application>');
     if (applicationEndIndex == -1) {
       throw FormatException('Could not find </application> tag in AndroidManifest.xml');
     }
 
     // Insert activity aliases before the closing application tag
-    final beforeApplicationEnd = manifestContent.substring(0, applicationEndIndex);
-    final afterApplicationEnd = manifestContent.substring(applicationEndIndex);
+    final beforeApplicationEnd = updatedContent.substring(0, applicationEndIndex);
+    final afterApplicationEnd = updatedContent.substring(applicationEndIndex);
     
     return '$beforeApplicationEnd\n$activityAliases\n$afterApplicationEnd';
+  }
+
+  /// Removes all existing activity aliases from the manifest
+  String _removeExistingActivityAliases(String manifestContent) {
+    // Remove all activity-alias tags and their content
+    final activityAliasPattern = RegExp(
+      r'\s*<!-- Activity alias for .*? -->\s*<activity-alias[^>]*>.*?</activity-alias>\s*',
+      dotAll: true,
+      multiLine: true,
+    );
+    
+    return manifestContent.replaceAll(activityAliasPattern, '');
+  }
+
+  /// Updates the MainActivity to use the default icon
+  String _updateMainActivityIcon(String manifestContent) {
+    // Check if there's a default icon configured and it exists
+    if (config.defaultIcon != null && config.icons.containsKey(config.defaultIcon)) {
+      // Update the application icon to use the configured default icon
+      // Handle any existing icon reference (not just the default one)
+      final appIconPattern = RegExp(r'android:icon="@mipmap/ic_launcher[^"]*"');
+      final replacement = 'android:icon="@mipmap/ic_launcher_${config.defaultIcon}"';
+      return manifestContent.replaceFirst(appIconPattern, replacement);
+    } else {
+      // If no default icon configured or it doesn't exist, fall back to original ic_launcher
+      // Handle any existing icon reference and replace with original
+      final appIconPattern = RegExp(r'android:icon="@mipmap/ic_launcher[^"]*"');
+      final replacement = 'android:icon="@mipmap/ic_launcher"';
+      return manifestContent.replaceFirst(appIconPattern, replacement);
+    }
   }
 
   /// Generates activity alias XML for each icon
@@ -49,8 +144,6 @@ class BuildConfigGenerator {
     final buffer = StringBuffer();
     
     for (final icon in config.icons.values) {
-      if (icon.identifier == 'default') continue; // Skip default icon
-      
       buffer.writeln('        <!-- Activity alias for ${icon.identifier} icon -->');
       buffer.writeln('        <activity-alias');
       buffer.writeln('            android:name=".${icon.identifier}Activity"');
@@ -176,8 +269,10 @@ void main() async {
           densityDir.createSync(recursive: true);
         }
         
-        final targetFileName = icon.identifier == 'default' 
-            ? 'ic_launcher.png' 
+        // For default icon, create a separate file to avoid overwriting original ic_launcher.png
+        // But only if the default icon is actually "default", otherwise treat it as a regular icon
+        final targetFileName = (icon.identifier == 'default' && config.defaultIcon == 'default') 
+            ? 'ic_launcher_default.png' 
             : 'ic_launcher_${icon.identifier}.png';
         final targetPath = path.join(densityPath, targetFileName);
         
@@ -227,6 +322,10 @@ void main() async {
 
       // Copy icon files to res folders
       await copyIconsToRes();
+      print('');
+
+      // Clean up old icons that are no longer in the config
+      await cleanupOldIcons();
       print('');
 
       // Validate icon files

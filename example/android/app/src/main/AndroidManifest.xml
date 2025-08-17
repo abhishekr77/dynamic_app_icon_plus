@@ -2,7 +2,7 @@
     <application
         android:label="dynamic_app_icons_example"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher_default">
         
         <!-- Main activity -->
         <activity
@@ -62,5 +62,56 @@
         <meta-data
             android:name="io.flutter.embedding.android.NormalTheme"
             android:resource="@style/NormalTheme" />
-    </application>
+<!-- Activity alias for default icon -->
+        <activity-alias
+            android:name=".defaultActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_default"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Activity alias for christmas icon -->
+        <activity-alias
+            android:name=".christmasActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_christmas"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Activity alias for halloween icon -->
+        <activity-alias
+            android:name=".halloweenActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_halloween"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Activity alias for new_year icon -->
+        <activity-alias
+            android:name=".new_yearActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_new_year"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+</application>
 </manifest>
