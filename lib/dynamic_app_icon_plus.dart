@@ -147,7 +147,8 @@ class DynamicAppIconPlus {
   /// 
   /// If a default_icon is configured in the YAML, it will automatically be set
   /// as the default icon on first load (this is the expected behavior).
-  static Future<void> initialize(String configPath, {bool validateFiles = true}) async {
+  /// Set [autoSetDefaultIcon] to false to disable automatic default icon setting.
+  static Future<void> initialize(String configPath, {bool validateFiles = true, bool autoSetDefaultIcon = true}) async {
     try {
       // Try to find the config file in multiple locations
       String? actualPath;
@@ -169,12 +170,19 @@ class DynamicAppIconPlus {
           _initialized = true;
           
           // Automatically set the default icon if configured in YAML
-          if (_config!.defaultIcon != null) {
+          if (_config!.defaultIcon != null && autoSetDefaultIcon) {
             try {
               // Add a small delay to ensure the app is fully loaded
               await Future.delayed(Duration(milliseconds: 1000));
-              await changeIcon(_config!.defaultIcon);
-              print('DynamicAppIconPlus: Default icon set successfully on initialization: ${_config!.defaultIcon}');
+              
+              // Check current icon before setting default
+              final currentIcon = await getCurrentIcon();
+              if (currentIcon != _config!.defaultIcon) {
+                await changeIcon(_config!.defaultIcon);
+                print('DynamicAppIconPlus: Default icon set successfully on initialization: ${_config!.defaultIcon}');
+              } else {
+                print('DynamicAppIconPlus: Default icon already set, skipping initialization: ${_config!.defaultIcon}');
+              }
             } catch (e) {
               print('DynamicAppIconPlus: Warning - Could not set default icon during initialization: $e');
               print('DynamicAppIconPlus: The default icon will be set when the app is fully loaded');
@@ -219,12 +227,19 @@ class DynamicAppIconPlus {
       _initialized = true;
       
       // Automatically set the default icon if configured in YAML
-      if (_config!.defaultIcon != null) {
+      if (_config!.defaultIcon != null && autoSetDefaultIcon) {
         try {
           // Add a small delay to ensure the app is fully loaded
           await Future.delayed(Duration(milliseconds: 1000));
-          await changeIcon(_config!.defaultIcon);
-          print('DynamicAppIconPlus: Default icon set successfully on initialization: ${_config!.defaultIcon}');
+          
+          // Check current icon before setting default
+          final currentIcon = await getCurrentIcon();
+          if (currentIcon != _config!.defaultIcon) {
+            await changeIcon(_config!.defaultIcon);
+            print('DynamicAppIconPlus: Default icon set successfully on initialization: ${_config!.defaultIcon}');
+          } else {
+            print('DynamicAppIconPlus: Default icon already set, skipping initialization: ${_config!.defaultIcon}');
+          }
         } catch (e) {
           print('DynamicAppIconPlus: Warning - Could not set default icon during initialization: $e');
           print('DynamicAppIconPlus: The default icon will be set when the app is fully loaded');
@@ -292,7 +307,8 @@ class DynamicAppIconPlus {
   /// 4. Automatically set the default icon (if configured in YAML)
   /// 
   /// This is a convenience method that combines initialization and setup.
-  static Future<void> setup(String configPath) async {
+  /// Set [autoSetDefaultIcon] to false to disable automatic default icon setting.
+  static Future<void> setup(String configPath, {bool autoSetDefaultIcon = true}) async {
     final projectRoot = Directory.current.path;
     final runner = DynamicAppIconPlusBuildRunner(
       projectRoot: projectRoot,
@@ -300,7 +316,7 @@ class DynamicAppIconPlus {
     );
 
     await runner.run();
-    await initialize(configPath);
+    await initialize(configPath, autoSetDefaultIcon: autoSetDefaultIcon);
   }
 
   /// Validates the current setup and returns any errors.
