@@ -76,7 +76,7 @@ import 'package:dynamic_app_icon_plus/dynamic_app_icon_plus.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize the plugin (default icon will be set automatically if configured)
+  // Initialize the plugin
   await DynamicAppIconPlus.initialize('icon_config.yaml');
   
   runApp(MyApp());
@@ -90,6 +90,9 @@ await DynamicAppIconPlus.resetToDefault();
 
 // Get current icon
 String currentIcon = await DynamicAppIconPlus.getCurrentIcon();
+
+// Set default icon after app is fully loaded (optional)
+await DynamicAppIconPlus.setDefaultIcon();
 ```
 
 ## Development Workflow
@@ -134,6 +137,11 @@ Resets all activities to enabled state for development.
 
 #### `getAvailableIconsFromPlatform()`
 Gets the list of available icon identifiers from the platform.
+
+#### `setDefaultIcon()`
+Sets the default icon after the app is fully loaded.
+- Call this method after the app has fully initialized to avoid crashes
+- This will set the icon specified in the `default_icon` field of your YAML configuration
 
 ### Properties
 
