@@ -34,7 +34,6 @@ class BuildConfigGenerator {
   Future<void> _backupManifest(String manifestPath) async {
     final backupPath = '$manifestPath.backup';
     final manifestFile = File(manifestPath);
-    final backupFile = File(backupPath);
     
     if (manifestFile.existsSync()) {
       await manifestFile.copy(backupPath);

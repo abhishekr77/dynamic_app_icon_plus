@@ -1,5 +1,5 @@
 name: dynamic_app_icon_plus
-description: A Flutter plugin for dynamically changing app icons on Android at runtime with simple YAML configuration.
+description: A Flutter plugin for dynamically changing app icons on Android at runtime with simple YAML configuration. Android only.
 version: 0.0.1
 homepage: https://github.com/abhishekr77/dynamic_app_icon_plus
 repository: https://github.com/abhishekr77/dynamic_app_icon_plus
