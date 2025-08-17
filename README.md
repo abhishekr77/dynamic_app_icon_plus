@@ -55,18 +55,14 @@ dart run dynamic_app_icon_plus:dynamic_app_icon_plus icon_config.yaml
 ```
 
 This will automatically:
+- **Copy your icon files** from assets to the appropriate res folders
 - Update your Android manifest
 - Generate build scripts
 - Create documentation
 
-### 3. Add Icon Files
+### 3. That's It! 🎉
 
-Add your icon files to the appropriate mipmap folders:
-- `android/app/src/main/res/mipmap-hdpi/`
-- `android/app/src/main/res/mipmap-mdpi/`
-- `android/app/src/main/res/mipmap-xhdpi/`
-- `android/app/src/main/res/mipmap-xxhdpi/`
-- `android/app/src/main/res/mipmap-xxxhdpi/`
+The setup tool now automatically copies your icon files from the paths specified in your YAML to the correct Android res folders. No manual copying needed!
 
 ### 4. Use in Your App
 
