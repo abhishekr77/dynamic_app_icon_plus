@@ -67,7 +67,7 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
 
   private fun changeIcon(iconIdentifier: String?, availableIcons: List<String>, defaultIcon: String, result: Result) {
     if (activity == null) {
-      result.error("NO_ACTIVITY", "Activity is not available", null)
+      result.error("NO_ACTIVITY", "Activity is not available. The app might not be fully loaded yet.", null)
       return
     }
 
@@ -118,7 +118,7 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
           Log.i("DynamicAppIconPlus", "Icon changed to configured default: $defaultIcon. ${defaultIcon}Activity is now enabled.")
         } catch (e: Exception) {
           // If default activity alias doesn't exist, enable MainActivity
-          Log.w("DynamicAppIconPlus", "Default activity alias ${defaultIcon}Activity not found, enabling MainActivity instead")
+          Log.w("DynamicAppIconPlus", "Default activity alias not found, enabling MainActivity instead")
           pm.setComponentEnabledSetting(mainActivity, 
               PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
               PackageManager.DONT_KILL_APP)
@@ -242,7 +242,7 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
         Log.i("DynamicAppIconPlus", "Icon reset to configured default: $defaultIcon. ${defaultIcon}Activity is now enabled.")
       } catch (e: Exception) {
         // If default activity alias doesn't exist, enable MainActivity
-        Log.w("DynamicAppIconPlus", "Default activity alias ${defaultIcon}Activity not found, enabling MainActivity instead")
+        Log.w("DynamicAppIconPlus", "Default activity alias not found, enabling MainActivity instead")
         val mainActivity = ComponentName(packageName, "$packageName.MainActivity")
         pm.setComponentEnabledSetting(mainActivity, 
             PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
@@ -322,6 +322,33 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
 
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {
     activity = binding.activity
+    // Initialize the default icon when the activity is attached
+    initializeDefaultIcon()
+  }
+
+  /// Initializes the default icon when the plugin is first loaded
+  private fun initializeDefaultIcon() {
+    if (activity == null) return
+    
+    try {
+      val pm = activity!!.packageManager
+      val packageName = activity!!.packageName
+      
+      // Check if MainActivity is currently enabled (means no custom icon is set)
+      val mainActivity = ComponentName(packageName, "$packageName.MainActivity")
+      val mainActivityEnabled = pm.getComponentEnabledSetting(mainActivity) == 
+          PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+      
+      if (mainActivityEnabled) {
+        // If MainActivity is enabled, it means no custom icon is set
+        // We should enable the default icon's activity alias
+        // But we need to get the default icon from the Dart side
+        // For now, we'll just log this information
+        Log.i("DynamicAppIconPlus", "MainActivity is enabled. Consider calling changeIcon() to set the default icon.")
+      }
+    } catch (e: Exception) {
+      Log.e("DynamicAppIconPlus", "Error initializing default icon: ${e.message}")
+    }
   }
 
   override fun onDetachedFromActivityForConfigChanges() {
