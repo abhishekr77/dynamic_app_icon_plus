@@ -18,58 +18,58 @@ Add this to your package's `pubspec.yaml` file:
 dependencies:
   dynamic_app_icon_plus:
     git:
-      url: https://github.com/abhishekr77/dynamic_app_icon_plus
+      url: https://github.com/yourusername/dynamic_app_icon_plus
       ref: main
 ```
 
 ## Quick Start
 
-### 1. Create Configuration File
+### 1. Add the dependency
+```yaml
+dependencies:
+  dynamic_app_icon_plus:
+    git:
+      url: https://github.com/yourusername/dynamic_app_icon_plus
+      ref: main
+```
 
+### 2. Create a configuration file
 Create `icon_config.yaml` in your project root:
 
 ```yaml
-default_icon: "default"
+# The default_icon must reference an icon defined in the icons section below
+# You can use any icon name as the default_icon
+default_icon: "independance"
 
 icons:
+  # Icon names are completely dynamic - you can use any names you want
   default:
-    path: "assets/icons/default_icon.png"
+    path: "assets/images/launcher_icon.png"
     label: "Default Icon"
     description: "The default app icon"
-
+  independance:
+    path: "assets/images/card2.png"
+    label: "Independence Icon"
+    description: "Festive independence-themed app icon"
+  payme:
+    path: "assets/images/pay.png"
+    label: "PayMe Icon"
+    description: "Payment-themed app icon"
+  # You can add as many icons as you want with any names
   christmas:
-    path: "assets/icons/christmas_icon.png"
+    path: "assets/images/christmas.png"
     label: "Christmas Icon"
-    description: "Festive Christmas-themed app icon"
-
   halloween:
-    path: "assets/icons/halloween_icon.png"
+    path: "assets/images/halloween.png"
     label: "Halloween Icon"
-    description: "Spooky Halloween-themed app icon"
 ```
 
-### 2. Run Setup Tool
-
+### 3. Run the setup tool
 ```bash
-dart run dynamic_app_icon_plus:dynamic_app_icon_plus icon_config.yaml
+dart run dynamic_app_icon_plus:setup icon_config.yaml
 ```
 
-This will automatically:
-- Update your Android manifest
-- Generate build scripts
-- Create documentation
-
-### 3. Add Icon Files
-
-Add your icon files to the appropriate mipmap folders:
-- `android/app/src/main/res/mipmap-hdpi/`
-- `android/app/src/main/res/mipmap-mdpi/`
-- `android/app/src/main/res/mipmap-xhdpi/`
-- `android/app/src/main/res/mipmap-xxhdpi/`
-- `android/app/src/main/res/mipmap-xxxhdpi/`
-
-### 4. Use in Your App
-
+### 4. Initialize in your app
 ```dart
 import 'package:dynamic_app_icon_plus/dynamic_app_icon_plus.dart';
 
@@ -90,7 +90,22 @@ await DynamicAppIconPlus.resetToDefault();
 
 // Get current icon
 String currentIcon = await DynamicAppIconPlus.getCurrentIcon();
+
+// Set default icon after app is fully loaded (optional)
+await DynamicAppIconPlus.setDefaultIcon();
 ```
+
+## Development Workflow
+
+### During Development:
+1. **Always call `resetForDevelopment()`** after initialization to keep all activities enabled
+2. **Test icon changes** by calling `changeIcon()`
+3. **Restart the app** to see the icon change
+4. **If you can't run the app**, call `resetForDevelopment()` again
+
+### For Production:
+1. **Remove the `resetForDevelopment()` call** from your production code
+2. **Icon changes will work normally** with proper activity switching
 
 ## That's It! 🎉
 
@@ -103,8 +118,10 @@ No manual registration, no complex setup - just add the dependency, create a con
 #### `initialize(String configPath)`
 Initializes the plugin with a configuration file.
 
-#### `changeIcon(String iconIdentifier)`
+#### `changeIcon(String? iconIdentifier)`
 Changes the app icon to the specified identifier.
+- If `iconIdentifier` is null, empty, or unknown, it defaults to the default icon
+- No errors are thrown for invalid icons - they automatically fallback to default
 
 #### `resetToDefault()`
 Resets the app icon to the default icon.
@@ -115,44 +132,121 @@ Gets the currently active icon identifier.
 #### `isSupported()`
 Checks if the current platform supports dynamic app icons.
 
+#### `resetForDevelopment()`
+Resets all activities to enabled state for development.
+
+#### `getAvailableIconsFromPlatform()`
+Gets the list of available icon identifiers from the platform.
+
+#### `setDefaultIcon()`
+Sets the default icon after the app is fully loaded.
+- Call this method after the app has fully initialized to avoid crashes
+- This will set the icon specified in the `default_icon` field of your YAML configuration
+
 ### Properties
 
 #### `availableIcons`
-Gets a list of all available icon identifiers.
+Gets a list of all available icon identifiers from the configuration.
 
 #### `isInitialized`
 Checks if the plugin has been initialized.
 
+## Error Handling
+
+The plugin now provides graceful error handling:
+
+```dart
+// These all work and default to the default icon
+await DynamicAppIconPlus.changeIcon(null);
+await DynamicAppIconPlus.changeIcon('');
+await DynamicAppIconPlus.changeIcon('unknown_icon');
+await DynamicAppIconPlus.changeIcon('invalid');
+
+// This works normally
+await DynamicAppIconPlus.changeIcon('christmas');
+```
+
 ## Configuration Format
+
+### Key Points:
+- **`default_icon`** is mandatory and must reference an icon defined in the `icons` section
+- **Icon names are completely dynamic** - you can use any names you want
+- **`default_icon` acts as a fallback** - if an invalid icon is passed, it falls back to the `default_icon`
 
 ### Simple Format
 ```yaml
-default_icon: "default"
+# You can use any icon name as default_icon
+default_icon: "my_favorite_icon"
 
 icons:
-  default: "assets/icons/default.png"
+  my_favorite_icon: "assets/icons/favorite.png"
   christmas: "assets/icons/christmas.png"
   halloween: "assets/icons/halloween.png"
+  # Add as many icons as you want with any names
+  custom_icon_1: "assets/icons/custom1.png"
+  custom_icon_2: "assets/icons/custom2.png"
 ```
 
 ### Advanced Format
+```yaml
+# You can use any icon name as default_icon
+default_icon: "my_favorite_icon"
+
+icons:
+  my_favorite_icon:
+    path: "assets/icons/favorite.png"
+    label: "My Favorite Icon"
+    description: "This is my favorite app icon"
+  christmas:
+    path: "assets/icons/christmas.png"
+    label: "Christmas Icon"
+    description: "Festive Christmas-themed app icon"
+    sizes:
+      xxhdpi: "assets/icons/christmas_xxhdpi.png"
+  halloween:
+    path: "assets/icons/halloween.png"
+    label: "Halloween Icon"
+    description: "Spooky Halloween-themed app icon"
+```
+
+### Advanced Format with Specific Resolutions
 ```yaml
 default_icon: "default"
 
 icons:
   default:
-    path: "assets/icons/default.png"
+    path: "assets/images/launcher_icon.png"
+    sizes:
+      mdpi: "assets/images/launcher_icon_48x48.png"
+      hdpi: "assets/images/launcher_icon_72x72.png"
+      xhdpi: "assets/images/launcher_icon_96x96.png"
+      xxhdpi: "assets/images/launcher_icon_144x144.png"
+      xxxhdpi: "assets/images/launcher_icon_192x192.png"
     label: "Default Icon"
     description: "The default app icon"
-  
-  christmas:
-    path: "assets/icons/christmas.png"
+
+  independance:
+    path: "assets/images/card2.png"
     sizes:
-      hdpi: "assets/icons/christmas_hdpi.png"
-      xhdpi: "assets/icons/christmas_xhdpi.png"
-    label: "Christmas Icon"
-    description: "Festive Christmas-themed app icon"
+      mdpi: "assets/images/card2_48x48.png"
+      hdpi: "assets/images/card2_72x72.png"
+      xhdpi: "assets/images/card2_96x96.png"
+      xxhdpi: "assets/images/card2_144x144.png"
+      xxxhdpi: "assets/images/card2_192x192.png"
+    label: "Independence Icon"
+    description: "Independence day themed icon"
 ```
+
+## Resolution Guidelines
+
+When using specific resolution paths, use these dimensions:
+- **mdpi**: 48x48 px
+- **hdpi**: 72x72 px  
+- **xhdpi**: 96x96 px
+- **xxhdpi**: 144x144 px
+- **xxxhdpi**: 192x192 px
+
+The plugin will automatically copy the appropriate resolution file to each density folder.
 
 ## Requirements
 

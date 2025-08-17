@@ -17,30 +17,36 @@ class DynamicAppIconPlus {
   static IconConfig? _config;
   static bool _initialized = false;
 
-  /// Changes the app icon to the one specified by [iconIdentifier].
+  /// Changes the app icon to the specified icon.
   /// 
-  /// The [iconIdentifier] should match one of the identifiers defined in your
-  /// configuration file.
-  /// 
-  /// Returns `true` if the icon was successfully changed, `false` otherwise.
-  /// 
-  /// Throws a [PlatformException] if the platform doesn't support dynamic icons
-  /// or if there's an error during the icon change process.
+  /// The [iconIdentifier] should match one of the identifiers defined in the configuration.
+  /// If the identifier is null, empty, or unknown, it will default to the configured default icon.
   /// 
   /// Throws a [StateError] if the plugin hasn't been initialized.
-  /// Throws an [ArgumentError] if the icon identifier is not valid.
-  static Future<bool> changeIcon(String iconIdentifier) async {
+  static Future<bool> changeIcon(String? iconIdentifier) async {
     if (!_initialized) {
       throw StateError('DynamicAppIconPlus has not been initialized. Call initialize() first.');
     }
     
+    // Handle null or empty icon identifier
+    if (iconIdentifier == null || iconIdentifier.trim().isEmpty) {
+      final defaultIcon = _config?.defaultIcon ?? 'default';
+      print('DynamicAppIconPlus: No icon identifier provided, defaulting to configured default icon: $defaultIcon');
+      iconIdentifier = defaultIcon;
+    }
+    
+    // Check if the icon is valid (but don't throw error, just warn)
     if (!isValidIcon(iconIdentifier)) {
-      throw ArgumentError('Invalid icon identifier: $iconIdentifier. Available icons: ${availableIcons.join(', ')}');
+      final defaultIcon = _config?.defaultIcon ?? 'default';
+      print('DynamicAppIconPlus: Unknown icon identifier "$iconIdentifier", defaulting to configured default icon: $defaultIcon');
+      iconIdentifier = defaultIcon;
     }
     
     try {
       final bool result = await _channel.invokeMethod('changeIcon', {
         'iconIdentifier': iconIdentifier,
+        'availableIcons': availableIcons, // Pass available icons from YAML config
+        'defaultIcon': _config?.defaultIcon ?? 'default', // Pass configured default icon
       });
       return result;
     } on PlatformException catch (e) {
@@ -64,16 +70,30 @@ class DynamicAppIconPlus {
     }
   }
 
-  /// Gets the currently active icon identifier.
+  /// Gets the current icon identifier.
   /// 
   /// Returns the identifier of the currently active icon, or `null` if
   /// no custom icon is currently set.
   static Future<String?> getCurrentIcon() async {
     try {
-      final String? result = await _channel.invokeMethod('getCurrentIcon');
+      final String? result = await _channel.invokeMethod('getCurrentIcon', {
+        'availableIcons': availableIcons, // Pass available icons from YAML config
+      });
       return result;
     } on PlatformException {
       return null;
+    }
+  }
+
+  /// Gets the list of available icon identifiers from the platform.
+  /// 
+  /// Returns a list of icon identifiers that are available on the current platform.
+  static Future<List<String>> getAvailableIconsFromPlatform() async {
+    try {
+      final List<dynamic> result = await _channel.invokeMethod('getAvailableIcons');
+      return result.cast<String>();
+    } on PlatformException {
+      return [];
     }
   }
 
@@ -82,7 +102,10 @@ class DynamicAppIconPlus {
   /// Returns `true` if the icon was successfully reset, `false` otherwise.
   static Future<bool> resetToDefault() async {
     try {
-      final bool result = await _channel.invokeMethod('resetToDefault');
+      final bool result = await _channel.invokeMethod('resetToDefault', {
+        'availableIcons': availableIcons, // Pass available icons from YAML config
+        'defaultIcon': _config?.defaultIcon ?? 'default', // Pass configured default icon
+      });
       return result;
     } on PlatformException catch (e) {
       throw PlatformException(
@@ -100,7 +123,9 @@ class DynamicAppIconPlus {
   /// Returns `true` if the reset was successful, `false` otherwise.
   static Future<bool> resetForDevelopment() async {
     try {
-      final bool result = await _channel.invokeMethod('resetForDevelopment');
+      final bool result = await _channel.invokeMethod('resetForDevelopment', {
+        'availableIcons': availableIcons, // Pass available icons from YAML config
+      });
       return result;
     } on PlatformException catch (e) {
       throw PlatformException(
@@ -119,6 +144,13 @@ class DynamicAppIconPlus {
   /// 1. As an absolute path
   /// 2. In the app's assets (if added to pubspec.yaml)
   /// 3. In the app's documents directory
+  /// 
+  /// If a default_icon is configured in the YAML, it will automatically be set
+  /// as the default icon on first load (this is the expected behavior).
+  /// Initialize the plugin with the configuration file.
+  /// 
+  /// The [configPath] should point to a YAML configuration file.
+  /// Set [validateFiles] to false to skip file existence validation (useful for testing).
   static Future<void> initialize(String configPath, {bool validateFiles = true}) async {
     try {
       // Try to find the config file in multiple locations
@@ -175,6 +207,7 @@ class DynamicAppIconPlus {
       }
       
       _initialized = true;
+      
     } catch (e) {
       throw FormatException('Failed to initialize DynamicAppIconPlus: $e');
     }
@@ -279,6 +312,32 @@ class DynamicAppIconPlus {
     );
 
     await runner.restoreAndroidManifest();
+  }
+
+  /// Sets the default icon after the app is fully loaded.
+  /// 
+  /// This method should be called after the app has fully initialized to avoid crashes.
+  /// It will set the icon specified in the default_icon field of your YAML configuration.
+  static Future<bool> setDefaultIcon() async {
+    if (!_initialized) {
+      throw StateError('DynamicAppIconPlus has not been initialized. Call initialize() first.');
+    }
+    
+    if (_config?.defaultIcon == null) {
+      print('DynamicAppIconPlus: No default icon configured in YAML');
+      return false;
+    }
+    
+    try {
+      final result = await changeIcon(_config!.defaultIcon);
+      if (result) {
+        print('DynamicAppIconPlus: Default icon set successfully: ${_config!.defaultIcon}');
+      }
+      return result;
+    } catch (e) {
+      print('DynamicAppIconPlus: Error setting default icon: $e');
+      return false;
+    }
   }
 
   /// Resets the plugin state (mainly for testing purposes)

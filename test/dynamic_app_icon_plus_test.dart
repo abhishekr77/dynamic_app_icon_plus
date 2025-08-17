@@ -63,17 +63,18 @@ icons:
       );
     });
 
-    test('changeIcon throws ArgumentError for invalid icon', () async {
+    test('changeIcon defaults to default icon for invalid icon', () async {
       await DynamicAppIconPlus.initializeFromString('''
 icons:
   valid_icon:
     path: "test/path.png"
 ''', validateFiles: false);
 
-      expect(
-        () => DynamicAppIconPlus.changeIcon('invalid_icon'),
-        throwsA(isA<ArgumentError>()),
-      );
+      final result = await DynamicAppIconPlus.changeIcon('invalid_icon');
+      expect(result, true);
+      expect(log, hasLength(1));
+      expect(log.last.method, 'changeIcon');
+      expect(log.last.arguments, {'iconIdentifier': 'default'});
     });
 
     test('getCurrentIcon returns current icon identifier', () async {
