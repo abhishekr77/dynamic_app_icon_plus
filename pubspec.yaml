@@ -41,6 +41,8 @@ flutter:
 # Executables for command-line tools
 executables:
   dynamic_app_icon_plus: dynamic_app_icon_plus
+  setup: setup
+  uninstall: uninstall
 
 # Additional metadata for pub.dev
 topics:
