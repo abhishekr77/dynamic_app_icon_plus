@@ -75,7 +75,7 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       iconIdentifier == "default" -> "default"
       iconIdentifier in availableIcons -> iconIdentifier // Use dynamic list from YAML
       else -> {
-        Log.w("DynamicAppIconPlus", "Unknown icon identifier: '$iconIdentifier'. Defaulting to 'default'.")
+        Log.w("DynamicAppIconPlus", "Unknown icon identifier: '$iconIdentifier'. Available icons: ${availableIcons.joinToString()}. Defaulting to 'default'.")
         "default"
       }
     }
@@ -100,26 +100,41 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
               PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 
               PackageManager.DONT_KILL_APP)
         } catch (e: Exception) {
-          // Ignore errors for non-existent activities
-          Log.d("DynamicAppIconPlus", "Activity alias $iconName not found, skipping")
+          // Ignore errors for non-existent activities (they might have been removed)
+          Log.d("DynamicAppIconPlus", "Activity alias $iconName not found, skipping (may have been removed from config)")
         }
       }
       
       // Now enable only the requested icon
       if (finalIconIdentifier == "default") {
-        // Enable the default activity alias for default icon
-        val defaultComponent = ComponentName(packageName, "$packageName.defaultActivity")
-        pm.setComponentEnabledSetting(defaultComponent, 
-            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
-            PackageManager.DONT_KILL_APP)
-        Log.i("DynamicAppIconPlus", "Icon changed to default. defaultActivity is now enabled.")
+        // Check if default activity alias exists
+        try {
+          val defaultComponent = ComponentName(packageName, "$packageName.defaultActivity")
+          pm.setComponentEnabledSetting(defaultComponent, 
+              PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
+              PackageManager.DONT_KILL_APP)
+          Log.i("DynamicAppIconPlus", "Icon changed to default. defaultActivity is now enabled.")
+        } catch (e: Exception) {
+          // If default activity alias doesn't exist, enable MainActivity
+          Log.w("DynamicAppIconPlus", "Default activity alias not found, enabling MainActivity instead")
+          pm.setComponentEnabledSetting(mainActivity, 
+              PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
+              PackageManager.DONT_KILL_APP)
+          Log.i("DynamicAppIconPlus", "Icon changed to default. MainActivity is now enabled.")
+        }
       } else {
         // Enable the specific activity alias
-        val newComponent = ComponentName(packageName, "$packageName.${finalIconIdentifier}Activity")
-        pm.setComponentEnabledSetting(newComponent, 
-            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
-            PackageManager.DONT_KILL_APP)
-        Log.i("DynamicAppIconPlus", "Icon changed to $finalIconIdentifier. ${finalIconIdentifier}Activity is now enabled.")
+        try {
+          val newComponent = ComponentName(packageName, "$packageName.${finalIconIdentifier}Activity")
+          pm.setComponentEnabledSetting(newComponent, 
+              PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
+              PackageManager.DONT_KILL_APP)
+          Log.i("DynamicAppIconPlus", "Icon changed to $finalIconIdentifier. ${finalIconIdentifier}Activity is now enabled.")
+        } catch (e: Exception) {
+          Log.e("DynamicAppIconPlus", "Activity alias ${finalIconIdentifier}Activity not found. It may have been removed from the configuration.")
+          result.error("ICON_NOT_FOUND", "Icon '$finalIconIdentifier' not found. It may have been removed from the configuration.", null)
+          return
+        }
       }
       
       // Don't restart the app - let the user restart manually
