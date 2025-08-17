@@ -16,10 +16,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  dynamic_app_icon_plus:
-    git:
-      url: https://github.com/yourusername/dynamic_app_icon_plus
-      ref: main
+  dynamic_app_icon_plus: ^0.0.1
 ```
 
 ## Quick Start
@@ -27,10 +24,12 @@ dependencies:
 ### 1. Add the dependency
 ```yaml
 dependencies:
-  dynamic_app_icon_plus:
-    git:
-      url: https://github.com/yourusername/dynamic_app_icon_plus
-      ref: main
+  dynamic_app_icon_plus: ^0.0.1
+```
+
+Then run:
+```bash
+flutter pub get
 ```
 
 ### 2. Create a configuration file
@@ -66,7 +65,7 @@ icons:
 
 ### 3. Run the setup tool
 ```bash
-dart run dynamic_app_icon_plus:setup icon_config.yaml
+dart run dynamic_app_icon_plus:dynamic_app_icon_plus icon_config.yaml
 ```
 
 ### 4. Initialize in your app
