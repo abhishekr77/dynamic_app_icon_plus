@@ -45,26 +45,30 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
     when (call.method) {
       "changeIcon" -> {
         val iconIdentifier = call.argument<String>("iconIdentifier")
-        changeIcon(iconIdentifier, result)
+        val availableIcons = call.argument<List<String>>("availableIcons") ?: listOf()
+        changeIcon(iconIdentifier, availableIcons, result)
       }
       "isSupported" -> result.success(true) // Android supports dynamic icons
       "getCurrentIcon" -> getCurrentIcon(result)
-      "resetToDefault" -> resetToDefault(result)
-      "resetForDevelopment" -> resetForDevelopment(result)
+      "resetToDefault" -> {
+        val availableIcons = call.argument<List<String>>("availableIcons") ?: listOf()
+        resetToDefault(availableIcons, result)
+      }
+      "resetForDevelopment" -> {
+        val availableIcons = call.argument<List<String>>("availableIcons") ?: listOf()
+        resetForDevelopment(availableIcons, result)
+      }
       "getAvailableIcons" -> getAvailableIcons(result)
       else -> result.notImplemented()
     }
   }
 
-  private fun changeIcon(iconIdentifier: String?, result: Result) {
+  private fun changeIcon(iconIdentifier: String?, availableIcons: List<String>, result: Result) {
     if (activity == null) {
       result.error("NO_ACTIVITY", "Activity is not available", null)
       return
     }
 
-    // Get available icons from the method call arguments
-    val availableIcons = call.argument<List<String>>("availableIcons") ?: listOf()
-    
     // Handle null, empty, or unknown icon identifiers by defaulting to "default"
     val finalIconIdentifier = when {
       iconIdentifier.isNullOrBlank() -> "default"
@@ -177,7 +181,7 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
     }
   }
 
-  private fun resetToDefault(result: Result) {
+  private fun resetToDefault(availableIcons: List<String>, result: Result) {
     if (activity == null) {
       result.error("NO_ACTIVITY", "Activity is not available", null)
       return
@@ -186,9 +190,6 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
     try {
       val pm = activity!!.packageManager
       val packageName = activity!!.packageName
-      
-      // Get available icons from the method call arguments
-      val availableIcons = call.argument<List<String>>("availableIcons") ?: listOf()
       
       // First, disable all activity aliases
       // Disable all activity aliases using the dynamic list
@@ -221,7 +222,7 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
     }
   }
 
-  private fun resetForDevelopment(result: Result) {
+  private fun resetForDevelopment(availableIcons: List<String>, result: Result) {
     if (activity == null) {
       result.error("NO_ACTIVITY", "Activity is not available", null)
       return
@@ -230,9 +231,6 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
     try {
       val pm = activity!!.packageManager
       val packageName = activity!!.packageName
-      
-      // Get available icons from the method call arguments
-      val availableIcons = call.argument<List<String>>("availableIcons") ?: listOf()
       
       // Enable MainActivity for development
       val mainActivity = ComponentName(packageName, "$packageName.MainActivity")
