@@ -182,7 +182,23 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       val pm = activity!!.packageManager
       val packageName = activity!!.packageName
       
-      // Disable all activity aliases and enable main activity
+      // First, disable all activity aliases
+      val availableIcons = listOf("christmas", "halloween", "payme", "independance")
+      
+      // Disable all activity aliases
+      for (iconName in availableIcons) {
+        try {
+          val iconComponent = ComponentName(packageName, "$packageName.${iconName}Activity")
+          pm.setComponentEnabledSetting(iconComponent, 
+              PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 
+              PackageManager.DONT_KILL_APP)
+        } catch (e: Exception) {
+          // Ignore errors for non-existent activities
+          Log.d("DynamicAppIconPlus", "Activity alias $iconName not found, skipping")
+        }
+      }
+      
+      // Now enable MainActivity for default icon
       val mainActivity = ComponentName(packageName, "$packageName.MainActivity")
       pm.setComponentEnabledSetting(mainActivity, 
           PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
@@ -190,7 +206,7 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       
       // Don't restart the app - let the user restart manually
       // The icon change will take effect when the app is restarted
-      Log.i("DynamicAppIconPlus", "Icon reset to default. Please restart the app to see the change.")
+      Log.i("DynamicAppIconPlus", "Icon reset to default. MainActivity is now enabled.")
       
       result.success(true)
     } catch (e: Exception) {
