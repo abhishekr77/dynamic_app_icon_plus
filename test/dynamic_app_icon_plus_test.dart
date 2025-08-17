@@ -44,6 +44,7 @@ void main() {
     test('changeIcon calls platform method with correct arguments', () async {
       // Initialize the plugin first
       await DynamicAppIconPlus.initializeFromString('''
+default_icon: "test_icon"
 icons:
   test_icon:
     path: "test/path.png"
@@ -53,7 +54,11 @@ icons:
       expect(result, true);
       expect(log, hasLength(1)); // Only changeIcon call
       expect(log.last.method, 'changeIcon');
-      expect(log.last.arguments, {'iconIdentifier': 'test_icon'});
+      expect(log.last.arguments, {
+        'iconIdentifier': 'test_icon',
+        'availableIcons': ['test_icon'],
+        'defaultIcon': 'test_icon'
+      });
     });
 
     test('changeIcon throws StateError when not initialized', () async {
@@ -65,6 +70,7 @@ icons:
 
     test('changeIcon defaults to default icon for invalid icon', () async {
       await DynamicAppIconPlus.initializeFromString('''
+default_icon: "valid_icon"
 icons:
   valid_icon:
     path: "test/path.png"
@@ -74,7 +80,11 @@ icons:
       expect(result, true);
       expect(log, hasLength(1));
       expect(log.last.method, 'changeIcon');
-      expect(log.last.arguments, {'iconIdentifier': 'default'});
+      expect(log.last.arguments, {
+        'iconIdentifier': 'valid_icon',
+        'availableIcons': ['valid_icon'],
+        'defaultIcon': 'valid_icon'
+      });
     });
 
     test('getCurrentIcon returns current icon identifier', () async {
@@ -93,6 +103,7 @@ icons:
 
     test('availableIcons returns list of configured icons', () async {
       await DynamicAppIconPlus.initializeFromString('''
+default_icon: "icon1"
 icons:
   icon1:
     path: "path1.png"
@@ -106,6 +117,7 @@ icons:
 
     test('isValidIcon returns true for valid icons', () async {
       await DynamicAppIconPlus.initializeFromString('''
+default_icon: "valid_icon"
 icons:
   valid_icon:
     path: "test/path.png"
@@ -119,6 +131,7 @@ icons:
       expect(DynamicAppIconPlus.isInitialized, false);
       
       await DynamicAppIconPlus.initializeFromString('''
+default_icon: "test_icon"
 icons:
   test_icon:
     path: "test/path.png"
@@ -129,6 +142,7 @@ icons:
 
     test('config returns configuration object', () async {
       await DynamicAppIconPlus.initializeFromString('''
+default_icon: "test_icon"
 icons:
   test_icon:
     path: "test/path.png"
