@@ -167,14 +167,6 @@ void main() async {
     final densities = ['mdpi', 'hdpi', 'xhdpi', 'xxhdpi', 'xxxhdpi'];
     
     for (final icon in config.icons.values) {
-      final sourcePath = path.join(projectRoot, icon.path);
-      final sourceFile = File(sourcePath);
-      
-      if (!sourceFile.existsSync()) {
-        print('⚠️  Warning: Source icon file not found: ${icon.path}');
-        continue;
-      }
-      
       // Copy to each density folder
       for (final density in densities) {
         final densityPath = path.join(resBasePath, 'mipmap-$density');
@@ -188,6 +180,25 @@ void main() async {
             ? 'ic_launcher.png' 
             : 'ic_launcher_${icon.identifier}.png';
         final targetPath = path.join(densityPath, targetFileName);
+        
+        // Determine source path for this density
+        String sourcePath;
+        if (icon.sizes != null && icon.sizes!.containsKey(density)) {
+          // Use specific resolution path if available
+          sourcePath = path.join(projectRoot, icon.sizes![density]!);
+          print('📱 Using specific ${density} resolution: ${icon.sizes![density]}');
+        } else {
+          // Fall back to main path
+          sourcePath = path.join(projectRoot, icon.path);
+          print('📱 Using main path for ${density}: ${icon.path}');
+        }
+        
+        final sourceFile = File(sourcePath);
+        
+        if (!sourceFile.existsSync()) {
+          print('⚠️  Warning: Source icon file not found: $sourcePath');
+          continue;
+        }
         
         try {
           await sourceFile.copy(targetPath);

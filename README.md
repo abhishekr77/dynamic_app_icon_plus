@@ -182,11 +182,53 @@ icons:
   christmas:
     path: "assets/icons/christmas.png"
     sizes:
-      hdpi: "assets/icons/christmas_hdpi.png"
-      xhdpi: "assets/icons/christmas_xhdpi.png"
+      mdpi: "assets/icons/christmas_48x48.png"
+      hdpi: "assets/icons/christmas_72x72.png"
+      xhdpi: "assets/icons/christmas_96x96.png"
+      xxhdpi: "assets/icons/christmas_144x144.png"
+      xxxhdpi: "assets/icons/christmas_192x192.png"
     label: "Christmas Icon"
     description: "Festive Christmas-themed app icon"
 ```
+
+### Advanced Format with Specific Resolutions
+```yaml
+default_icon: "default"
+
+icons:
+  default:
+    path: "assets/images/launcher_icon.png"
+    sizes:
+      mdpi: "assets/images/launcher_icon_48x48.png"
+      hdpi: "assets/images/launcher_icon_72x72.png"
+      xhdpi: "assets/images/launcher_icon_96x96.png"
+      xxhdpi: "assets/images/launcher_icon_144x144.png"
+      xxxhdpi: "assets/images/launcher_icon_192x192.png"
+    label: "Default Icon"
+    description: "The default app icon"
+
+  independance:
+    path: "assets/images/card2.png"
+    sizes:
+      mdpi: "assets/images/card2_48x48.png"
+      hdpi: "assets/images/card2_72x72.png"
+      xhdpi: "assets/images/card2_96x96.png"
+      xxhdpi: "assets/images/card2_144x144.png"
+      xxxhdpi: "assets/images/card2_192x192.png"
+    label: "Independence Icon"
+    description: "Independence day themed icon"
+```
+
+## Resolution Guidelines
+
+When using specific resolution paths, use these dimensions:
+- **mdpi**: 48x48 px
+- **hdpi**: 72x72 px  
+- **xhdpi**: 96x96 px
+- **xxhdpi**: 144x144 px
+- **xxxhdpi**: 192x192 px
+
+The plugin will automatically copy the appropriate resolution file to each density folder.
 
 ## Requirements
 
