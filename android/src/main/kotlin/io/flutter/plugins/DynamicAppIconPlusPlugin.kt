@@ -66,17 +66,12 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
     val finalIconIdentifier = when {
       iconIdentifier.isNullOrBlank() -> "default"
       iconIdentifier == "default" -> "default"
-      else -> iconIdentifier
+      else -> iconIdentifier // Accept any icon identifier dynamically
     }
 
     try {
       val pm = activity!!.packageManager
       val packageName = activity!!.packageName
-      
-      // Get available icons dynamically from manifest
-      val availableIcons = getAvailableIconsFromManifest(pm, packageName)
-      Log.d("DynamicAppIconPlus", "Requested icon: '$finalIconIdentifier'")
-      Log.d("DynamicAppIconPlus", "Available icons: ${availableIcons.joinToString(", ")}")
       
       // First, disable all activity aliases and MainActivity
       val mainActivity = ComponentName(packageName, "$packageName.MainActivity")
@@ -86,8 +81,9 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
           PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 
           PackageManager.DONT_KILL_APP)
       
-      // Disable all activity aliases
-      for (iconName in availableIcons) {
+      // Disable all known activity aliases (we'll try common ones)
+      val knownIcons = listOf("christmas", "halloween", "payme", "independance", "diwali", "new_year")
+      for (iconName in knownIcons) {
         try {
           val iconComponent = ComponentName(packageName, "$packageName.${iconName}Activity")
           pm.setComponentEnabledSetting(iconComponent, 
@@ -107,22 +103,12 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
             PackageManager.DONT_KILL_APP)
         Log.i("DynamicAppIconPlus", "Icon changed to default. MainActivity is now enabled.")
       } else {
-        // Check if the requested icon exists
-        if (finalIconIdentifier in availableIcons) {
-          // Enable the specific activity alias
-          val newComponent = ComponentName(packageName, "$packageName.${finalIconIdentifier}Activity")
-          pm.setComponentEnabledSetting(newComponent, 
-              PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
-              PackageManager.DONT_KILL_APP)
-          Log.i("DynamicAppIconPlus", "Icon changed to $finalIconIdentifier. ${finalIconIdentifier}Activity is now enabled.")
-        } else {
-          Log.w("DynamicAppIconPlus", "Unknown icon identifier: '$finalIconIdentifier'. Defaulting to 'default'.")
-          // Enable MainActivity for default icon
-          pm.setComponentEnabledSetting(mainActivity, 
-              PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
-              PackageManager.DONT_KILL_APP)
-          Log.i("DynamicAppIconPlus", "Icon changed to default. MainActivity is now enabled.")
-        }
+        // Enable the specific activity alias
+        val newComponent = ComponentName(packageName, "$packageName.${finalIconIdentifier}Activity")
+        pm.setComponentEnabledSetting(newComponent, 
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
+            PackageManager.DONT_KILL_APP)
+        Log.i("DynamicAppIconPlus", "Icon changed to $finalIconIdentifier. ${finalIconIdentifier}Activity is now enabled.")
       }
       
       // Don't restart the app - let the user restart manually
@@ -157,8 +143,8 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       }
       
       // Check each activity alias to see which one is enabled
-      val availableIcons = getAvailableIconsFromManifest(pm, packageName)
-      for (iconName in availableIcons) {
+      val knownIcons = listOf("christmas", "halloween", "payme", "independance", "diwali", "new_year")
+      for (iconName in knownIcons) {
         try {
           val iconComponent = ComponentName(packageName, "$packageName.${iconName}Activity")
           val iconEnabled = pm.getComponentEnabledSetting(iconComponent) == 
@@ -193,10 +179,10 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       val packageName = activity!!.packageName
       
       // First, disable all activity aliases
-      val availableIcons = getAvailableIconsFromManifest(pm, packageName)
+      val knownIcons = listOf("christmas", "halloween", "payme", "independance", "diwali", "new_year")
       
       // Disable all activity aliases
-      for (iconName in availableIcons) {
+      for (iconName in knownIcons) {
         try {
           val iconComponent = ComponentName(packageName, "$packageName.${iconName}Activity")
           pm.setComponentEnabledSetting(iconComponent, 
@@ -243,8 +229,8 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       
       // Also enable all activity aliases for development
       // This ensures the app can be launched from any icon
-      val availableIcons = getAvailableIconsFromManifest(pm, packageName) // Add your icon names here
-      for (iconName in availableIcons) {
+      val knownIcons = listOf("christmas", "halloween", "payme", "independance", "diwali", "new_year")
+      for (iconName in knownIcons) {
         try {
           val iconComponent = ComponentName(packageName, "$packageName.${iconName}Activity")
           pm.setComponentEnabledSetting(iconComponent, 
@@ -256,11 +242,11 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
         }
       }
       
-      Log.i("DynamicAppIconPlus", "All activities enabled for development")
+      Log.i("DynamicAppIconPlus", "Development mode enabled. All activities are now enabled.")
       result.success(true)
     } catch (e: Exception) {
-      Log.e("DynamicAppIconPlus", "Error resetting for development: ${e.message}")
-      result.error("RESET_DEV_ERROR", "Failed to reset for development: ${e.message}", null)
+      Log.e("DynamicAppIconPlus", "Error enabling development mode: ${e.message}")
+      result.error("DEVELOPMENT_ERROR", "Failed to enable development mode: ${e.message}", null)
     }
   }
 
@@ -274,45 +260,12 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       val pm = activity!!.packageManager
       val packageName = activity!!.packageName
       
-      val availableIcons = getAvailableIconsFromManifest(pm, packageName)
+      val availableIcons = listOf("christmas", "halloween", "payme", "independance", "diwali", "new_year")
       result.success(availableIcons)
     } catch (e: Exception) {
       Log.e("DynamicAppIconPlus", "Error getting available icons: ${e.message}")
       result.error("GET_AVAILABLE_ICONS_ERROR", "Failed to get available icons: ${e.message}", null)
     }
-  }
-
-  private fun getAvailableIconsFromManifest(pm: PackageManager, packageName: String): List<String> {
-    val availableIcons = mutableListOf<String>()
-    
-    try {
-      // Get package info to access manifest
-      val packageInfo = pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES)
-      
-      // Look for activity aliases in the manifest
-      for (activityInfo in packageInfo.activities) {
-        val activityName = activityInfo.name
-        Log.d("DynamicAppIconPlus", "Found activity: $activityName")
-        
-        // Check if it's an activity alias (ends with Activity but not MainActivity)
-        // Activity aliases are included in the activities list
-        if (activityName.endsWith("Activity") && !activityName.endsWith("MainActivity")) {
-          // Extract icon name from activity name (e.g., "com.example.diwaliActivity" -> "diwali")
-          val iconName = activityName.substringAfterLast(".").removeSuffix("Activity")
-          if (iconName.isNotEmpty()) {
-            availableIcons.add(iconName)
-            Log.d("DynamicAppIconPlus", "Added icon: $iconName")
-          }
-        }
-      }
-      
-      Log.d("DynamicAppIconPlus", "Available icons found: ${availableIcons.joinToString(", ")}")
-    } catch (e: Exception) {
-      Log.e("DynamicAppIconPlus", "Error reading manifest: ${e.message}")
-      // Fallback to empty list
-    }
-    
-    return availableIcons
   }
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
