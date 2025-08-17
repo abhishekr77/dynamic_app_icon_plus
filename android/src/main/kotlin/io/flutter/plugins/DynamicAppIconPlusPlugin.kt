@@ -50,7 +50,10 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
         changeIcon(iconIdentifier, availableIcons, defaultIcon, result)
       }
       "isSupported" -> result.success(true) // Android supports dynamic icons
-      "getCurrentIcon" -> getCurrentIcon(result)
+      "getCurrentIcon" -> {
+        val availableIcons = call.argument<List<String>>("availableIcons") ?: listOf()
+        getCurrentIcon(availableIcons, result)
+      }
       "resetToDefault" -> {
         val availableIcons = call.argument<List<String>>("availableIcons") ?: listOf()
         val defaultIcon = call.argument<String>("defaultIcon") ?: "default"
@@ -150,7 +153,7 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
     }
   }
 
-  private fun getCurrentIcon(result: Result) {
+  private fun getCurrentIcon(availableIcons: List<String>, result: Result) {
     if (activity == null) {
       result.error("NO_ACTIVITY", "Activity is not available", null)
       return
@@ -160,32 +163,8 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       val pm = activity!!.packageManager
       val packageName = activity!!.packageName
       
-      // Check which activity alias is currently enabled
-      val mainActivity = ComponentName(packageName, "$packageName.MainActivity")
-      val mainActivityEnabled = pm.getComponentEnabledSetting(mainActivity) == 
-          PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-      
-      // Check if default activity alias is enabled
-      val defaultActivity = ComponentName(packageName, "$packageName.defaultActivity")
-      val defaultActivityEnabled = pm.getComponentEnabledSetting(defaultActivity) == 
-          PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-      
-      if (defaultActivityEnabled) {
-        result.success("default")
-        return
-      }
-      
-      if (mainActivityEnabled) {
-        result.success("default")
-        return
-      }
-      
-      // We need to get available icons from somewhere - for now, we'll use a fallback
-      // In a real implementation, this should be passed from the Dart side
-      val fallbackIcons = listOf("christmas", "halloween", "payme", "independance", "diwali", "new_year", "janmastami")
-      
-      // Check each activity alias to see which one is enabled
-      for (iconName in fallbackIcons) {
+      // Check each activity alias to see which one is enabled using the dynamic list
+      for (iconName in availableIcons) {
         try {
           val iconComponent = ComponentName(packageName, "$packageName.${iconName}Activity")
           val iconEnabled = pm.getComponentEnabledSetting(iconComponent) == 

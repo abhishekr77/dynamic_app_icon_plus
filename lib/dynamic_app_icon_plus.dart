@@ -70,13 +70,15 @@ class DynamicAppIconPlus {
     }
   }
 
-  /// Gets the currently active icon identifier.
+  /// Gets the current icon identifier.
   /// 
   /// Returns the identifier of the currently active icon, or `null` if
   /// no custom icon is currently set.
   static Future<String?> getCurrentIcon() async {
     try {
-      final String? result = await _channel.invokeMethod('getCurrentIcon');
+      final String? result = await _channel.invokeMethod('getCurrentIcon', {
+        'availableIcons': availableIcons, // Pass available icons from YAML config
+      });
       return result;
     } on PlatformException {
       return null;
