@@ -106,7 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Icon reset to default successfully!'),
+            content: Text('Reset to default icon successfully!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -114,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to reset icon'),
+            content: Text('Failed to reset to default'),
             backgroundColor: Colors.red,
           ),
         );
@@ -130,6 +130,26 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         isLoading = false;
       });
+    }
+  }
+
+  Future<void> _getAvailableIcons() async {
+    try {
+      final icons = await DynamicAppIconPlus.getAvailableIconsFromPlatform();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Available icons: ${icons.join(", ")}'),
+          backgroundColor: Colors.blue,
+          duration: Duration(seconds: 5),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error getting icons: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -190,13 +210,30 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: isLoading ? null : _resetToDefault,
-              child: Text('Reset to Default'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                padding: EdgeInsets.symmetric(vertical: 16),
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: isLoading ? null : _resetToDefault,
+                    child: Text('Reset to Default'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: isLoading ? null : _getAvailableIcons,
+                    child: Text('Debug: Get Icons'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                    ),
+                  ),
+                ),
+              ],
             ),
             if (isLoading)
               Padding(

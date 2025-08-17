@@ -75,6 +75,8 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       
       // Get available icons dynamically from manifest
       val availableIcons = getAvailableIconsFromManifest(pm, packageName)
+      Log.d("DynamicAppIconPlus", "Requested icon: '$finalIconIdentifier'")
+      Log.d("DynamicAppIconPlus", "Available icons: ${availableIcons.joinToString(", ")}")
       
       // First, disable all activity aliases and MainActivity
       val mainActivity = ComponentName(packageName, "$packageName.MainActivity")
@@ -290,15 +292,21 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       // Look for activity aliases in the manifest
       for (activityInfo in packageInfo.activities) {
         val activityName = activityInfo.name
+        Log.d("DynamicAppIconPlus", "Found activity: $activityName")
+        
         // Check if it's an activity alias (ends with Activity but not MainActivity)
+        // Activity aliases are included in the activities list
         if (activityName.endsWith("Activity") && !activityName.endsWith("MainActivity")) {
           // Extract icon name from activity name (e.g., "com.example.diwaliActivity" -> "diwali")
           val iconName = activityName.substringAfterLast(".").removeSuffix("Activity")
           if (iconName.isNotEmpty()) {
             availableIcons.add(iconName)
+            Log.d("DynamicAppIconPlus", "Added icon: $iconName")
           }
         }
       }
+      
+      Log.d("DynamicAppIconPlus", "Available icons found: ${availableIcons.joinToString(", ")}")
     } catch (e: Exception) {
       Log.e("DynamicAppIconPlus", "Error reading manifest: ${e.message}")
       // Fallback to empty list
