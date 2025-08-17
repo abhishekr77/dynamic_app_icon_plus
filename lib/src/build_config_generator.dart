@@ -12,7 +12,7 @@ class BuildConfigGenerator {
     required this.projectRoot,
   });
 
-  /// Generates Android manifest modifications
+  /// Generates the Android manifest modifications
   Future<void> generateAndroidManifest() async {
     final manifestPath = path.join(projectRoot, 'android', 'app', 'src', 'main', 'AndroidManifest.xml');
     final manifestFile = File(manifestPath);
@@ -21,56 +21,43 @@ class BuildConfigGenerator {
       throw FileSystemException('AndroidManifest.xml not found', manifestPath);
     }
 
-    // Create backup first
-    final backupPath = path.join(projectRoot, 'android', 'app', 'src', 'main', 'AndroidManifest.xml.backup');
-    if (!File(backupPath).existsSync()) {
-      await manifestFile.copy(backupPath);
-    }
-
-    final content = await manifestFile.readAsString();
-    
-    // Remove existing activity aliases to prevent duplicates
-    final cleanedContent = _removeExistingActivityAliases(content);
-    
-    // Inject new activity aliases
-    final modifiedContent = _injectActivityAliases(cleanedContent);
+    final manifestContent = await manifestFile.readAsString();
+    final modifiedContent = _injectActivityAliases(manifestContent);
     
     await manifestFile.writeAsString(modifiedContent);
-  }
-
-  /// Removes existing activity aliases from the manifest content
-  String _removeExistingActivityAliases(String content) {
-    // Remove all activity-alias entries and their comments
-    // First, remove activity aliases with comments
-    var cleanedContent = content.replaceAllMapped(
-      RegExp(r'\s*<!-- Activity alias for .*? -->\s*<activity-alias[^>]*>.*?</activity-alias>\s*', dotAll: true),
-      (match) => '',
-    );
-    
-    // Then, remove any remaining activity-alias entries without comments
-    cleanedContent = cleanedContent.replaceAllMapped(
-      RegExp(r'\s*<activity-alias[^>]*>.*?</activity-alias>\s*', dotAll: true),
-      (match) => '',
-    );
-    
-    return cleanedContent;
   }
 
   /// Injects activity aliases into the AndroidManifest.xml
   String _injectActivityAliases(String manifestContent) {
     final activityAliases = _generateActivityAliases();
     
+    // Update the MainActivity to use the default icon
+    final updatedContent = _updateMainActivityIcon(manifestContent);
+    
     // Find the closing </application> tag
-    final applicationEndIndex = manifestContent.lastIndexOf('</application>');
+    final applicationEndIndex = updatedContent.lastIndexOf('</application>');
     if (applicationEndIndex == -1) {
       throw FormatException('Could not find </application> tag in AndroidManifest.xml');
     }
 
     // Insert activity aliases before the closing application tag
-    final beforeApplicationEnd = manifestContent.substring(0, applicationEndIndex);
-    final afterApplicationEnd = manifestContent.substring(applicationEndIndex);
+    final beforeApplicationEnd = updatedContent.substring(0, applicationEndIndex);
+    final afterApplicationEnd = updatedContent.substring(applicationEndIndex);
     
     return '$beforeApplicationEnd\n$activityAliases\n$afterApplicationEnd';
+  }
+
+  /// Updates the MainActivity to use the default icon
+  String _updateMainActivityIcon(String manifestContent) {
+    // Check if there's a default icon defined
+    final defaultIcon = config.icons['default'];
+    if (defaultIcon != null) {
+      // Update the application icon to use the default icon
+      final appIconPattern = RegExp(r'android:icon="@mipmap/ic_launcher"');
+      final replacement = 'android:icon="@mipmap/ic_launcher_default"';
+      return manifestContent.replaceFirst(appIconPattern, replacement);
+    }
+    return manifestContent;
   }
 
   /// Generates activity alias XML for each icon
@@ -78,14 +65,19 @@ class BuildConfigGenerator {
     final buffer = StringBuffer();
     
     for (final icon in config.icons.values) {
-      if (icon.identifier == 'default') continue; // Skip default icon
-      
       buffer.writeln('        <!-- Activity alias for ${icon.identifier} icon -->');
       buffer.writeln('        <activity-alias');
       buffer.writeln('            android:name=".${icon.identifier}Activity"');
       buffer.writeln('            android:enabled="false"');
       buffer.writeln('            android:exported="true"');
-      buffer.writeln('            android:icon="@mipmap/ic_launcher_${icon.identifier}"');
+      
+      // Use different icon reference for default
+      if (icon.identifier == 'default') {
+        buffer.writeln('            android:icon="@mipmap/ic_launcher_default"');
+      } else {
+        buffer.writeln('            android:icon="@mipmap/ic_launcher_${icon.identifier}"');
+      }
+      
       buffer.writeln('            android:targetActivity=".MainActivity">');
       buffer.writeln('            <intent-filter>');
       buffer.writeln('                <action android:name="android.intent.action.MAIN" />');
@@ -205,8 +197,9 @@ void main() async {
           densityDir.createSync(recursive: true);
         }
         
+        // For default icon, create a separate file to avoid overwriting original ic_launcher.png
         final targetFileName = icon.identifier == 'default' 
-            ? 'ic_launcher.png' 
+            ? 'ic_launcher_default.png' 
             : 'ic_launcher_${icon.identifier}.png';
         final targetPath = path.join(densityPath, targetFileName);
         

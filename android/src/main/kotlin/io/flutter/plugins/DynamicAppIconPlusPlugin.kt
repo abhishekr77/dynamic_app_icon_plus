@@ -107,11 +107,12 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       
       // Now enable only the requested icon
       if (finalIconIdentifier == "default") {
-        // Enable MainActivity for default icon
-        pm.setComponentEnabledSetting(mainActivity, 
+        // Enable the default activity alias for default icon
+        val defaultComponent = ComponentName(packageName, "$packageName.defaultActivity")
+        pm.setComponentEnabledSetting(defaultComponent, 
             PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
             PackageManager.DONT_KILL_APP)
-        Log.i("DynamicAppIconPlus", "Icon changed to default. MainActivity is now enabled.")
+        Log.i("DynamicAppIconPlus", "Icon changed to default. defaultActivity is now enabled.")
       } else {
         // Enable the specific activity alias
         val newComponent = ComponentName(packageName, "$packageName.${finalIconIdentifier}Activity")
@@ -147,6 +148,16 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       val mainActivityEnabled = pm.getComponentEnabledSetting(mainActivity) == 
           PackageManager.COMPONENT_ENABLED_STATE_ENABLED
       
+      // Check if default activity alias is enabled
+      val defaultActivity = ComponentName(packageName, "$packageName.defaultActivity")
+      val defaultActivityEnabled = pm.getComponentEnabledSetting(defaultActivity) == 
+          PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+      
+      if (defaultActivityEnabled) {
+        result.success("default")
+        return
+      }
+      
       if (mainActivityEnabled) {
         result.success("default")
         return
@@ -154,7 +165,7 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
       
       // We need to get available icons from somewhere - for now, we'll use a fallback
       // In a real implementation, this should be passed from the Dart side
-      val fallbackIcons = listOf("christmas", "halloween", "payme", "independance", "diwali", "new_year")
+      val fallbackIcons = listOf("christmas", "halloween", "payme", "independance", "diwali", "new_year", "janmastami")
       
       // Check each activity alias to see which one is enabled
       for (iconName in fallbackIcons) {
