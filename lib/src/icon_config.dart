@@ -77,23 +77,27 @@ class IconConfig {
   /// Gets all available icon identifiers
   List<String> get availableIcons => icons.keys.toList();
 
-  /// Validates the configuration
+  /// Validates the configuration and returns any errors.
+  /// 
+  /// Returns a list of error messages, or an empty list if everything is valid.
   List<String> validate({bool checkFiles = true}) {
     final errors = <String>[];
     
-    if (icons.isEmpty) {
-      errors.add('No icons defined in configuration');
+    // Validate that default_icon is specified
+    if (defaultIcon == null) {
+      errors.add('default_icon is required in YAML configuration');
+    } else {
+      // Validate that default_icon references an existing icon
+      if (!icons.containsKey(defaultIcon)) {
+        errors.add('default_icon "$defaultIcon" references a non-existent icon. Available icons: ${icons.keys.join(', ')}');
+      }
     }
-
+    
+    // Validate each icon
     for (final icon in icons.values) {
-      final iconErrors = icon.validate(checkFiles: checkFiles);
-      errors.addAll(iconErrors.map((e) => '${icon.identifier}: $e'));
+      errors.addAll(icon.validate(checkFiles: checkFiles));
     }
-
-    if (defaultIcon != null && !icons.containsKey(defaultIcon)) {
-      errors.add('Default icon "$defaultIcon" is not defined in icons');
-    }
-
+    
     return errors;
   }
 }

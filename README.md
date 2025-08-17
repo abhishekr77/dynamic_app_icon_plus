@@ -18,54 +18,58 @@ Add this to your package's `pubspec.yaml` file:
 dependencies:
   dynamic_app_icon_plus:
     git:
-      url: https://github.com/abhishekr77/dynamic_app_icon_plus
+      url: https://github.com/yourusername/dynamic_app_icon_plus
       ref: main
 ```
 
 ## Quick Start
 
-### 1. Create Configuration File
+### 1. Add the dependency
+```yaml
+dependencies:
+  dynamic_app_icon_plus:
+    git:
+      url: https://github.com/yourusername/dynamic_app_icon_plus
+      ref: main
+```
 
+### 2. Create a configuration file
 Create `icon_config.yaml` in your project root:
 
 ```yaml
-default_icon: "default"
+# The default_icon must reference an icon defined in the icons section below
+# You can use any icon name as the default_icon
+default_icon: "independance"
 
 icons:
+  # Icon names are completely dynamic - you can use any names you want
   default:
-    path: "assets/icons/default_icon.png"
+    path: "assets/images/launcher_icon.png"
     label: "Default Icon"
     description: "The default app icon"
-
+  independance:
+    path: "assets/images/card2.png"
+    label: "Independence Icon"
+    description: "Festive independence-themed app icon"
+  payme:
+    path: "assets/images/pay.png"
+    label: "PayMe Icon"
+    description: "Payment-themed app icon"
+  # You can add as many icons as you want with any names
   christmas:
-    path: "assets/icons/christmas_icon.png"
+    path: "assets/images/christmas.png"
     label: "Christmas Icon"
-    description: "Festive Christmas-themed app icon"
-
   halloween:
-    path: "assets/icons/halloween_icon.png"
+    path: "assets/images/halloween.png"
     label: "Halloween Icon"
-    description: "Spooky Halloween-themed app icon"
 ```
 
-### 2. Run Setup Tool
-
+### 3. Run the setup tool
 ```bash
-dart run dynamic_app_icon_plus:dynamic_app_icon_plus icon_config.yaml
+dart run dynamic_app_icon_plus:setup icon_config.yaml
 ```
 
-This will automatically:
-- **Copy your icon files** from assets to the appropriate res folders
-- Update your Android manifest
-- Generate build scripts
-- Create documentation
-
-### 3. That's It! 🎉
-
-The setup tool now automatically copies your icon files from the paths specified in your YAML to the correct Android res folders. No manual copying needed!
-
-### 4. Use in Your App
-
+### 4. Initialize in your app
 ```dart
 import 'package:dynamic_app_icon_plus/dynamic_app_icon_plus.dart';
 
@@ -74,9 +78,6 @@ void main() async {
   
   // Initialize the plugin
   await DynamicAppIconPlus.initialize('icon_config.yaml');
-  
-  // For development: reset all activities to enabled state
-  await DynamicAppIconPlus.resetForDevelopment();
   
   runApp(MyApp());
 }
@@ -89,6 +90,9 @@ await DynamicAppIconPlus.resetToDefault();
 
 // Get current icon
 String currentIcon = await DynamicAppIconPlus.getCurrentIcon();
+
+// Set default icon after app is fully loaded (optional)
+await DynamicAppIconPlus.setDefaultIcon();
 ```
 
 ## Development Workflow
@@ -134,6 +138,11 @@ Resets all activities to enabled state for development.
 #### `getAvailableIconsFromPlatform()`
 Gets the list of available icon identifiers from the platform.
 
+#### `setDefaultIcon()`
+Sets the default icon after the app is fully loaded.
+- Call this method after the app has fully initialized to avoid crashes
+- This will set the icon specified in the `default_icon` field of your YAML configuration
+
 ### Properties
 
 #### `availableIcons`
@@ -159,36 +168,45 @@ await DynamicAppIconPlus.changeIcon('christmas');
 
 ## Configuration Format
 
+### Key Points:
+- **`default_icon`** is mandatory and must reference an icon defined in the `icons` section
+- **Icon names are completely dynamic** - you can use any names you want
+- **`default_icon` acts as a fallback** - if an invalid icon is passed, it falls back to the `default_icon`
+
 ### Simple Format
 ```yaml
-default_icon: "default"
+# You can use any icon name as default_icon
+default_icon: "my_favorite_icon"
 
 icons:
-  default: "assets/icons/default.png"
+  my_favorite_icon: "assets/icons/favorite.png"
   christmas: "assets/icons/christmas.png"
   halloween: "assets/icons/halloween.png"
+  # Add as many icons as you want with any names
+  custom_icon_1: "assets/icons/custom1.png"
+  custom_icon_2: "assets/icons/custom2.png"
 ```
 
 ### Advanced Format
 ```yaml
-default_icon: "default"
+# You can use any icon name as default_icon
+default_icon: "my_favorite_icon"
 
 icons:
-  default:
-    path: "assets/icons/default.png"
-    label: "Default Icon"
-    description: "The default app icon"
-  
+  my_favorite_icon:
+    path: "assets/icons/favorite.png"
+    label: "My Favorite Icon"
+    description: "This is my favorite app icon"
   christmas:
     path: "assets/icons/christmas.png"
-    sizes:
-      mdpi: "assets/icons/christmas_48x48.png"
-      hdpi: "assets/icons/christmas_72x72.png"
-      xhdpi: "assets/icons/christmas_96x96.png"
-      xxhdpi: "assets/icons/christmas_144x144.png"
-      xxxhdpi: "assets/icons/christmas_192x192.png"
     label: "Christmas Icon"
     description: "Festive Christmas-themed app icon"
+    sizes:
+      xxhdpi: "assets/icons/christmas_xxhdpi.png"
+  halloween:
+    path: "assets/icons/halloween.png"
+    label: "Halloween Icon"
+    description: "Spooky Halloween-themed app icon"
 ```
 
 ### Advanced Format with Specific Resolutions
