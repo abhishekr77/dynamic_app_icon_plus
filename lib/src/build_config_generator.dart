@@ -219,28 +219,19 @@ void main() async {
     print('');
 
     try {
-      // Load configuration
-      final config = IconConfig.fromYamlFile(configPath);
-      
       // Validate configuration
       final configErrors = config.validate();
       if (configErrors.isNotEmpty) {
         throw FormatException('Configuration validation failed:\n${configErrors.join('\n')}');
       }
 
-      // Create generator
-      final generator = BuildConfigGenerator(
-        config: config,
-        projectRoot: projectRoot,
-      );
-
       // Copy icon files to res folders
-      await generator.copyIconsToRes();
+      await copyIconsToRes();
       print('');
 
       // Validate icon files
       print('🔍 Validating icon files...');
-      final fileErrors = generator.validateIconFiles();
+      final fileErrors = validateIconFiles();
       if (fileErrors.isNotEmpty) {
         print('⚠️  Warning: Some icon files are missing:');
         for (final error in fileErrors) {
@@ -257,7 +248,7 @@ void main() async {
       // Generate Android manifest modifications
       print('📱 Setting up Android manifest...');
       try {
-        await generator.generateAndroidManifest();
+        await generateAndroidManifest();
         print('✅ Android manifest updated successfully');
       } catch (e) {
         print('❌ Failed to update Android manifest: $e');
@@ -268,13 +259,13 @@ void main() async {
 
       // Generate build script
       print('📜 Generating build script...');
-      await generator.generateBuildScript();
+      await generateBuildScript();
       print('✅ Build script generated at scripts/setup_dynamic_icons.dart');
       print('');
 
       // Generate README section
       print('📖 Generating documentation...');
-      final readmeSection = generator.generateReadmeSection();
+      final readmeSection = generateReadmeSection();
       final readmePath = path.join(projectRoot, 'DYNAMIC_ICONS_README.md');
       await File(readmePath).writeAsString(readmeSection);
       print('✅ Documentation generated at DYNAMIC_ICONS_README.md');
