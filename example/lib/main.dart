@@ -4,9 +4,9 @@ import 'package:dynamic_app_icon_plus/dynamic_app_icon_plus.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Automatic setup and initialization (without auto-setting default icon)
+  // Automatic setup and initialization
   try {
-    await DynamicAppIconPlus.setup('example_config.yaml', setDefaultIcon: false);
+    await DynamicAppIconPlus.setup('example_config.yaml');
     print('Plugin setup and initialized successfully');
   } catch (e) {
     print('Failed to setup plugin: $e');
@@ -46,7 +46,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _loadCurrentIcon();
-    _setDefaultIconAfterLoad();
   }
 
   Future<void> _loadCurrentIcon() async {
@@ -58,18 +57,6 @@ class _MyHomePageState extends State<MyHomePage> {
     } catch (e) {
       print('Failed to load current icon: $e');
     }
-  }
-
-  Future<void> _setDefaultIconAfterLoad() async {
-    // Set the default icon after the app is fully loaded
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        await DynamicAppIconPlus.setDefaultIcon();
-        print('Default icon set successfully after app load');
-      } catch (e) {
-        print('Failed to set default icon: $e');
-      }
-    });
   }
 
   Future<void> _changeIcon(String iconIdentifier) async {

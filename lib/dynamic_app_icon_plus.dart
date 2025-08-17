@@ -144,7 +144,10 @@ class DynamicAppIconPlus {
   /// 1. As an absolute path
   /// 2. In the app's assets (if added to pubspec.yaml)
   /// 3. In the app's documents directory
-  static Future<void> initialize(String configPath, {bool validateFiles = true, bool setDefaultIcon = false}) async {
+  /// 
+  /// If a default_icon is configured in the YAML, it will automatically be set
+  /// as the default icon on first load (this is the expected behavior).
+  static Future<void> initialize(String configPath, {bool validateFiles = true}) async {
     try {
       // Try to find the config file in multiple locations
       String? actualPath;
@@ -165,16 +168,16 @@ class DynamicAppIconPlus {
           
           _initialized = true;
           
-          // Automatically set the default icon if requested (but don't fail if it doesn't work)
-          if (setDefaultIcon && _config!.defaultIcon != null) {
+          // Automatically set the default icon if configured in YAML
+          if (_config!.defaultIcon != null) {
             try {
               // Add a small delay to ensure the app is fully loaded
-              await Future.delayed(Duration(milliseconds: 500));
+              await Future.delayed(Duration(milliseconds: 1000));
               await changeIcon(_config!.defaultIcon);
               print('DynamicAppIconPlus: Default icon set successfully on initialization: ${_config!.defaultIcon}');
             } catch (e) {
               print('DynamicAppIconPlus: Warning - Could not set default icon during initialization: $e');
-              print('DynamicAppIconPlus: You can manually set the default icon later using changeIcon() or setDefaultIcon()');
+              print('DynamicAppIconPlus: The default icon will be set when the app is fully loaded');
             }
           }
           
@@ -215,16 +218,16 @@ class DynamicAppIconPlus {
       
       _initialized = true;
       
-      // Automatically set the default icon if requested (but don't fail if it doesn't work)
-      if (setDefaultIcon && _config!.defaultIcon != null) {
+      // Automatically set the default icon if configured in YAML
+      if (_config!.defaultIcon != null) {
         try {
           // Add a small delay to ensure the app is fully loaded
-          await Future.delayed(Duration(milliseconds: 500));
+          await Future.delayed(Duration(milliseconds: 1000));
           await changeIcon(_config!.defaultIcon);
           print('DynamicAppIconPlus: Default icon set successfully on initialization: ${_config!.defaultIcon}');
         } catch (e) {
           print('DynamicAppIconPlus: Warning - Could not set default icon during initialization: $e');
-          print('DynamicAppIconPlus: You can manually set the default icon later using changeIcon() or setDefaultIcon()');
+          print('DynamicAppIconPlus: The default icon will be set when the app is fully loaded');
         }
       }
       
@@ -286,10 +289,10 @@ class DynamicAppIconPlus {
   /// 1. Load the configuration from the specified file
   /// 2. Generate Android manifest modifications
   /// 3. Create build scripts and documentation
-  /// 4. Automatically set the default icon (disabled by default to prevent crashes)
+  /// 4. Automatically set the default icon (if configured in YAML)
   /// 
   /// This is a convenience method that combines initialization and setup.
-  static Future<void> setup(String configPath, {bool setDefaultIcon = false}) async {
+  static Future<void> setup(String configPath) async {
     final projectRoot = Directory.current.path;
     final runner = DynamicAppIconPlusBuildRunner(
       projectRoot: projectRoot,
@@ -297,7 +300,7 @@ class DynamicAppIconPlus {
     );
 
     await runner.run();
-    await initialize(configPath, setDefaultIcon: setDefaultIcon);
+    await initialize(configPath);
   }
 
   /// Validates the current setup and returns any errors.
