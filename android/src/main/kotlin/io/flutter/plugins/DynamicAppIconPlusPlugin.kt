@@ -322,6 +322,33 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
 
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {
     activity = binding.activity
+    // Initialize the default icon when the activity is attached
+    initializeDefaultIcon()
+  }
+
+  /// Initializes the default icon when the plugin is first loaded
+  private fun initializeDefaultIcon() {
+    if (activity == null) return
+    
+    try {
+      val pm = activity!!.packageManager
+      val packageName = activity!!.packageName
+      
+      // Check if MainActivity is currently enabled (means no custom icon is set)
+      val mainActivity = ComponentName(packageName, "$packageName.MainActivity")
+      val mainActivityEnabled = pm.getComponentEnabledSetting(mainActivity) == 
+          PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+      
+      if (mainActivityEnabled) {
+        // If MainActivity is enabled, it means no custom icon is set
+        // We should enable the default icon's activity alias
+        // But we need to get the default icon from the Dart side
+        // For now, we'll just log this information
+        Log.i("DynamicAppIconPlus", "MainActivity is enabled. Consider calling changeIcon() to set the default icon.")
+      }
+    } catch (e: Exception) {
+      Log.e("DynamicAppIconPlus", "Error initializing default icon: ${e.message}")
+    }
   }
 
   override fun onDetachedFromActivityForConfigChanges() {

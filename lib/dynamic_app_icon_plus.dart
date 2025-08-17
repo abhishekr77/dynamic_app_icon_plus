@@ -142,7 +142,7 @@ class DynamicAppIconPlus {
   /// 1. As an absolute path
   /// 2. In the app's assets (if added to pubspec.yaml)
   /// 3. In the app's documents directory
-  static Future<void> initialize(String configPath, {bool validateFiles = true}) async {
+  static Future<void> initialize(String configPath, {bool validateFiles = true, bool setDefaultIcon = true}) async {
     try {
       // Try to find the config file in multiple locations
       String? actualPath;
@@ -162,6 +162,12 @@ class DynamicAppIconPlus {
           }
           
           _initialized = true;
+          
+          // Automatically set the default icon if requested
+          if (setDefaultIcon && _config!.defaultIcon != null) {
+            await changeIcon(_config!.defaultIcon);
+          }
+          
           return; // Successfully loaded from assets
         } catch (e) {
           // Not found in assets, continue to try file system
@@ -198,6 +204,12 @@ class DynamicAppIconPlus {
       }
       
       _initialized = true;
+      
+      // Automatically set the default icon if requested
+      if (setDefaultIcon && _config!.defaultIcon != null) {
+        await changeIcon(_config!.defaultIcon);
+      }
+      
     } catch (e) {
       throw FormatException('Failed to initialize DynamicAppIconPlus: $e');
     }
@@ -256,9 +268,10 @@ class DynamicAppIconPlus {
   /// 1. Load the configuration from the specified file
   /// 2. Generate Android manifest modifications
   /// 3. Create build scripts and documentation
+  /// 4. Automatically set the default icon
   /// 
   /// This is a convenience method that combines initialization and setup.
-  static Future<void> setup(String configPath) async {
+  static Future<void> setup(String configPath, {bool setDefaultIcon = true}) async {
     final projectRoot = Directory.current.path;
     final runner = DynamicAppIconPlusBuildRunner(
       projectRoot: projectRoot,
@@ -266,7 +279,7 @@ class DynamicAppIconPlus {
     );
 
     await runner.run();
-    await initialize(configPath);
+    await initialize(configPath, setDefaultIcon: setDefaultIcon);
   }
 
   /// Validates the current setup and returns any errors.

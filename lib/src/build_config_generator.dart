@@ -123,18 +123,20 @@ class BuildConfigGenerator {
 
   /// Updates the MainActivity to use the default icon
   String _updateMainActivityIcon(String manifestContent) {
-    // Check if there's a default icon defined and it's "default"
-    final defaultIcon = config.icons['default'];
-    if (defaultIcon != null && config.defaultIcon == 'default') {
-      // Update the application icon to use the default icon
+    // Check if there's a default icon configured
+    if (config.defaultIcon != null && config.defaultIcon != 'default') {
+      // Update the application icon to use the configured default icon
+      final appIconPattern = RegExp(r'android:icon="@mipmap/ic_launcher"');
+      final replacement = 'android:icon="@mipmap/ic_launcher_${config.defaultIcon}"';
+      return manifestContent.replaceFirst(appIconPattern, replacement);
+    } else if (config.defaultIcon == 'default' && config.icons.containsKey('default')) {
+      // Special case: when default_icon is "default" and there's a "default" icon defined
       final appIconPattern = RegExp(r'android:icon="@mipmap/ic_launcher"');
       final replacement = 'android:icon="@mipmap/ic_launcher_default"';
       return manifestContent.replaceFirst(appIconPattern, replacement);
     } else {
-      // If no default icon or default icon is not "default", revert to original ic_launcher
-      final appIconPattern = RegExp(r'android:icon="@mipmap/ic_launcher_default"');
-      final replacement = 'android:icon="@mipmap/ic_launcher"';
-      return manifestContent.replaceFirst(appIconPattern, replacement);
+      // If no default icon configured or it's "default" but no "default" icon exists, keep original
+      return manifestContent;
     }
   }
 
