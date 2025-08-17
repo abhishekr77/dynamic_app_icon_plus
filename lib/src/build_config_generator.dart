@@ -121,14 +121,20 @@ class BuildConfigGenerator {
     return manifestContent.replaceAll(activityAliasPattern, '');
   }
 
-  /// Updates the MainActivity to use the default icon
+  /// Updates the main activity icon in the manifest
   String _updateMainActivityIcon(String manifestContent) {
-    // Check if there's a default icon configured
     if (config.defaultIcon != null && config.defaultIcon != 'default') {
-      // Update the application icon to use the configured default icon
-      final appIconPattern = RegExp(r'android:icon="@mipmap/ic_launcher"');
-      final replacement = 'android:icon="@mipmap/ic_launcher_${config.defaultIcon}"';
-      return manifestContent.replaceFirst(appIconPattern, replacement);
+      // Check if the default icon exists in the icons section
+      if (config.icons.containsKey(config.defaultIcon)) {
+        // Update the application icon to use the configured default icon
+        final appIconPattern = RegExp(r'android:icon="@mipmap/ic_launcher"');
+        final replacement = 'android:icon="@mipmap/ic_launcher_${config.defaultIcon}"';
+        return manifestContent.replaceFirst(appIconPattern, replacement);
+      } else {
+        // Default icon doesn't exist in icons section, keep original ic_launcher
+        print('⚠️  Warning: default_icon "${config.defaultIcon}" is not defined in icons section. Using original ic_launcher.');
+        return manifestContent;
+      }
     } else if (config.defaultIcon == 'default' && config.icons.containsKey('default')) {
       // Special case: when default_icon is "default" and there's a "default" icon defined
       final appIconPattern = RegExp(r'android:icon="@mipmap/ic_launcher"');

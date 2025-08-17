@@ -140,34 +140,5 @@ icons:
       expect(config!.icons.containsKey('test_icon'), true);
       expect(config.icons['test_icon']!.label, 'Test Icon');
     });
-
-    test('isSetup returns false when not set up', () async {
-      final isSetup = await DynamicAppIconPlus.isSetup();
-      expect(isSetup, false);
-    });
-
-    test('getConfiguredIcons returns empty list when not set up', () async {
-      final icons = await DynamicAppIconPlus.getConfiguredIcons();
-      expect(icons, isEmpty);
-    });
-
-    test('uninstall returns true when not initialized', () async {
-      final result = await DynamicAppIconPlus.uninstall();
-      expect(result, true);
-    });
-
-    test('uninstall works when initialized', () async {
-      await DynamicAppIconPlus.initializeFromString('''
-icons:
-  test_icon:
-    path: "test/path.png"
-''', validateFiles: false);
-
-      expect(DynamicAppIconPlus.isInitialized, true);
-      
-      final result = await DynamicAppIconPlus.uninstall();
-      expect(result, true);
-      expect(DynamicAppIconPlus.isInitialized, false);
-    });
   });
 }

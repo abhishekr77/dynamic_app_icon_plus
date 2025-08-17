@@ -118,7 +118,7 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
           Log.i("DynamicAppIconPlus", "Icon changed to configured default: $defaultIcon. ${defaultIcon}Activity is now enabled.")
         } catch (e: Exception) {
           // If default activity alias doesn't exist, enable MainActivity
-          Log.w("DynamicAppIconPlus", "Default activity alias not found, enabling MainActivity instead")
+          Log.w("DynamicAppIconPlus", "Default activity alias ${defaultIcon}Activity not found, enabling MainActivity instead")
           pm.setComponentEnabledSetting(mainActivity, 
               PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 
               PackageManager.DONT_KILL_APP)
@@ -242,7 +242,7 @@ class DynamicAppIconPlusPlugin : FlutterPlugin, MethodCallHandler, ActivityAware
         Log.i("DynamicAppIconPlus", "Icon reset to configured default: $defaultIcon. ${defaultIcon}Activity is now enabled.")
       } catch (e: Exception) {
         // If default activity alias doesn't exist, enable MainActivity
-        Log.w("DynamicAppIconPlus", "Default activity alias not found, enabling MainActivity instead")
+        Log.w("DynamicAppIconPlus", "Default activity alias ${defaultIcon}Activity not found, enabling MainActivity instead")
         val mainActivity = ComponentName(packageName, "$packageName.MainActivity")
         pm.setComponentEnabledSetting(mainActivity, 
             PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 

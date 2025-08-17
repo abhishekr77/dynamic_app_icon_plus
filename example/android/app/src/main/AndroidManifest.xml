@@ -22,19 +22,53 @@
             </intent-filter>
         </activity>
         
+        <!-- Activity aliases for custom icons -->
+        <activity-alias
+            android:name=".christmasActivity"
+            android:enabled="false"
+            android:icon="@mipmap/ic_launcher_christmas"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        
+        <activity-alias
+            android:name=".halloweenActivity"
+            android:enabled="false"
+            android:icon="@mipmap/ic_launcher_halloween"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        
+        <activity-alias
+            android:name=".new_yearActivity"
+            android:enabled="false"
+            android:icon="@mipmap/ic_launcher_new_year"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
         <meta-data
             android:name="io.flutter.embedding.android.NormalTheme"
             android:resource="@style/NormalTheme" />
-            
-        <!-- Activity alias for independance icon -->
+    
+<!-- Activity alias for christmas icon -->
         <activity-alias
-            android:name=".independanceActivity"
+            android:name=".christmasActivity"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_independance"
+            android:icon="@mipmap/ic_launcher_christmas"
             android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -42,12 +76,12 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- Activity alias for payme icon -->
+        <!-- Activity alias for halloween icon -->
         <activity-alias
-            android:name=".paymeActivity"
+            android:name=".halloweenActivity"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_payme"
+            android:icon="@mipmap/ic_launcher_halloween"
             android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -55,17 +89,134 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- Activity alias for diwali icon -->
+        <!-- Activity alias for new_year icon -->
         <activity-alias
-            android:name=".diwaliActivity"
+            android:name=".new_yearActivity"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_diwali"
+            android:icon="@mipmap/ic_launcher_new_year"
             android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity-alias>
-    </application>
+
+<!-- Activity alias for christmas icon -->
+        <activity-alias
+            android:name=".christmasActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_christmas"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Activity alias for halloween icon -->
+        <activity-alias
+            android:name=".halloweenActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_halloween"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Activity alias for new_year icon -->
+        <activity-alias
+            android:name=".new_yearActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_new_year"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+<!-- Activity alias for christmas icon -->
+        <activity-alias
+            android:name=".christmasActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_christmas"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Activity alias for halloween icon -->
+        <activity-alias
+            android:name=".halloweenActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_halloween"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Activity alias for new_year icon -->
+        <activity-alias
+            android:name=".new_yearActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_new_year"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+<!-- Activity alias for christmas icon -->
+        <activity-alias
+            android:name=".christmasActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_christmas"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Activity alias for halloween icon -->
+        <activity-alias
+            android:name=".halloweenActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_halloween"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Activity alias for new_year icon -->
+        <activity-alias
+            android:name=".new_yearActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_new_year"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+</application>
 </manifest>

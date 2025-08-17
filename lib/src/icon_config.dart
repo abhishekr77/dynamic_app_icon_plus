@@ -90,9 +90,9 @@ class IconConfig {
       errors.addAll(iconErrors.map((e) => '${icon.identifier}: $e'));
     }
 
-    if (defaultIcon != null && !icons.containsKey(defaultIcon)) {
-      errors.add('Default icon "$defaultIcon" is not defined in icons');
-    }
+    // Remove the validation that requires default_icon to exist in icons
+    // This allows default_icon to be any string, even if it doesn't have a corresponding icon
+    // The system will handle this gracefully by falling back to MainActivity
 
     return errors;
   }
