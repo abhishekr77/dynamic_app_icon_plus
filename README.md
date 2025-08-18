@@ -16,7 +16,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  dynamic_app_icon_plus: ^0.0.1
+  dynamic_app_icon_plus:
 ```
 
 ## Quick Start
@@ -24,7 +24,7 @@ dependencies:
 ### 1. Add the dependency
 ```yaml
 dependencies:
-  dynamic_app_icon_plus: ^0.0.1
+  dynamic_app_icon_plus:
 ```
 
 Then run:
@@ -50,10 +50,6 @@ icons:
     path: "assets/images/card2.png"
     label: "Independence Icon"
     description: "Festive independence-themed app icon"
-  payme:
-    path: "assets/images/pay.png"
-    label: "PayMe Icon"
-    description: "Payment-themed app icon"
   # You can add as many icons as you want with any names
   christmas:
     path: "assets/images/christmas.png"
@@ -92,15 +88,20 @@ String currentIcon = await DynamicAppIconPlus.getCurrentIcon();
 
 // Set default icon after app is fully loaded (optional)
 await DynamicAppIconPlus.setDefaultIcon();
+
+// Get icon paths for UI display
+List<String> iconPaths = DynamicAppIconPlus.availableIconPaths;
+
+// Get detailed icon information for rich UI
+List<Map<String, String>> iconDetails = DynamicAppIconPlus.availableIconDetails;
 ```
 
 ## Development Workflow
 
 ### During Development:
-1. **Always call `resetForDevelopment()`** after initialization to keep all activities enabled
-2. **Test icon changes** by calling `changeIcon()`
-3. **Restart the app** to see the icon change
-4. **If you can't run the app**, call `resetForDevelopment()` again
+1. **Test icon changes** by calling `changeIcon()`
+2. **Restart the app** to see the icon change
+3. **If you encounter issues** (like app not launching), call `resetForDevelopment()` to reset all activities
 
 ### For Production:
 1. **Remove the `resetForDevelopment()` call** from your production code
@@ -109,6 +110,47 @@ await DynamicAppIconPlus.setDefaultIcon();
 ## That's It! 🎉
 
 No manual registration, no complex setup - just add the dependency, create a config file, run the setup tool, and you're ready to go!
+
+## UI Examples
+
+### Simple Icon List with ListView.builder
+```dart
+ListView.builder(
+  itemCount: DynamicAppIconPlus.availableIcons.length,
+  itemBuilder: (context, index) {
+    final iconIdentifier = DynamicAppIconPlus.availableIcons[index];
+    final iconPath = DynamicAppIconPlus.availableIconPaths[index];
+    
+    return ListTile(
+      leading: Image.asset(iconPath, width: 48, height: 48),
+      title: Text(iconIdentifier),
+      onTap: () => DynamicAppIconPlus.changeIcon(iconIdentifier),
+    );
+  },
+)
+```
+
+### Rich Icon Selection UI
+```dart
+ListView.builder(
+  itemCount: DynamicAppIconPlus.availableIconDetails.length,
+  itemBuilder: (context, index) {
+    final icon = DynamicAppIconPlus.availableIconDetails[index];
+    
+    return Card(
+      child: ListTile(
+        leading: Image.asset(icon['path']!, width: 48, height: 48),
+        title: Text(icon['label']!),
+        subtitle: Text(icon['description']!),
+        trailing: IconButton(
+          icon: Icon(Icons.check_circle),
+          onPressed: () => DynamicAppIconPlus.changeIcon(icon['identifier']!),
+        ),
+      ),
+    );
+  },
+)
+```
 
 ## API Reference
 
@@ -145,6 +187,12 @@ Sets the default icon after the app is fully loaded.
 
 #### `availableIcons`
 Gets a list of all available icon identifiers from the configuration.
+
+#### `availableIconPaths`
+Gets a list of all available icon paths for UI display.
+
+#### `availableIconDetails`
+Gets detailed icon information for UI display (identifier, path, label, description).
 
 #### `isInitialized`
 Checks if the plugin has been initialized.

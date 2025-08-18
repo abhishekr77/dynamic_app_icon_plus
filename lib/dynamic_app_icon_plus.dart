@@ -263,6 +263,37 @@ class DynamicAppIconPlus {
     return _config!.availableIcons;
   }
 
+  /// Gets all available icon paths for UI display.
+  /// 
+  /// Returns a list of icon paths that can be used in ListView.builder or other UI components.
+  /// Each path corresponds to the icon file location as defined in your YAML configuration.
+  /// 
+  /// Returns an empty list if the plugin hasn't been initialized.
+  static List<String> get availableIconPaths {
+    if (!_initialized || _config == null) {
+      return [];
+    }
+    return _config!.icons.values.map((icon) => icon.path).toList();
+  }
+
+  /// Gets detailed icon information for UI display.
+  /// 
+  /// Returns a list of maps containing icon details (identifier, path, label, description).
+  /// Perfect for creating rich icon selection UIs with ListView.builder.
+  /// 
+  /// Returns an empty list if the plugin hasn't been initialized.
+  static List<Map<String, String>> get availableIconDetails {
+    if (!_initialized || _config == null) {
+      return [];
+    }
+    return _config!.icons.entries.map((entry) => {
+      'identifier': entry.key,
+      'path': entry.value.path,
+      'label': entry.value.label ?? entry.key,
+      'description': entry.value.description ?? '',
+    }).toList();
+  }
+
   /// Validates an icon identifier.
   /// 
   /// Returns `true` if the identifier exists in the configuration.
