@@ -2,6 +2,9 @@
 
 A Flutter plugin for dynamically changing app icons on Android at runtime with simple YAML configuration. **Android only.**
 
+## Demo
+https://github.com/user-attachments/assets/3def5056-ce75-4d24-89c7-809ffa584d14
+
 ## Features
 
 - 🎨 **Dynamic Icon Switching**: Change your app icon at runtime
