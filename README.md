@@ -134,9 +134,6 @@ Checks if the current platform supports dynamic app icons.
 #### `resetForDevelopment()`
 Resets all activities to enabled state for development.
 
-#### `getAvailableIconsFromPlatform()`
-Gets the list of available icon identifiers from the platform.
-
 #### `setDefaultIcon()`
 Sets the default icon after the app is fully loaded.
 - Call this method after the app has fully initialized to avoid crashes

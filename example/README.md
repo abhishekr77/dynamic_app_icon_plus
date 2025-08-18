@@ -24,7 +24,7 @@ icons:
 
 2. **Run the setup command**:
 ```bash
-dart run dynamic_app_icons:setup example_config.yaml
+dart run dynamic_app_icon_plus:dynamic_app_icon_plus example_config.yaml
 ```
 
 3. **Add your icon files** to the appropriate mipmap folders:
@@ -81,18 +81,8 @@ If you encounter issues:
 dart run dynamic_app_icons:validate example_config.yaml
 ```
 
-2. **Restore Android manifest** (if needed):
-```dart
-await DynamicAppIconPlus.restoreAndroidManifest();
-```
-
-3. **Validate setup**:
-```dart
-final errors = await DynamicAppIconPlus.validateSetup('example_config.yaml');
-if (errors.isNotEmpty) {
-  print('Setup errors: ${errors.join('\n')}');
-}
-```
+2. **Check your configuration file** - Make sure all paths are correct
+3. **Verify icon files exist** - Ensure all icon files are in the correct locations
 
 ## Next Steps
 

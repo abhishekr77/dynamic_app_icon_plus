@@ -88,6 +88,9 @@ class DynamicAppIconPlus {
   /// Gets the list of available icon identifiers from the platform.
   /// 
   /// Returns a list of icon identifiers that are available on the current platform.
+  /// 
+  /// @internal This method is for internal use only.
+  @visibleForTesting
   static Future<List<String>> getAvailableIconsFromPlatform() async {
     try {
       final List<dynamic> result = await _channel.invokeMethod('getAvailableIcons');
@@ -268,6 +271,9 @@ class DynamicAppIconPlus {
   /// 3. Create build scripts and documentation
   /// 
   /// This is a convenience method that combines initialization and setup.
+  /// 
+  /// @internal This method is for internal use only.
+  @visibleForTesting
   static Future<void> setup(String configPath) async {
     final projectRoot = Directory.current.path;
     final runner = DynamicAppIconPlusBuildRunner(
@@ -282,6 +288,9 @@ class DynamicAppIconPlus {
   /// Validates the current setup and returns any errors.
   /// 
   /// Returns a list of error messages, or an empty list if everything is valid.
+  /// 
+  /// @internal This method is for internal use only.
+  @visibleForTesting
   static Future<List<String>> validateSetup(String configPath) async {
     final projectRoot = Directory.current.path;
     final runner = DynamicAppIconPlusBuildRunner(
@@ -293,6 +302,9 @@ class DynamicAppIconPlus {
   }
 
   /// Creates a backup of the Android manifest before making changes.
+  /// 
+  /// @internal This method is for internal use only.
+  @visibleForTesting
   static Future<void> backupAndroidManifest() async {
     final projectRoot = Directory.current.path;
     final runner = DynamicAppIconPlusBuildRunner(
@@ -304,6 +316,9 @@ class DynamicAppIconPlus {
   }
 
   /// Restores the Android manifest from backup.
+  /// 
+  /// @internal This method is for internal use only.
+  @visibleForTesting
   static Future<void> restoreAndroidManifest() async {
     final projectRoot = Directory.current.path;
     final runner = DynamicAppIconPlusBuildRunner(
