@@ -2,6 +2,9 @@
 
 A Flutter plugin for dynamically changing app icons on Android at runtime with simple YAML configuration. **Android only.**
 
+## Demo
+https://github.com/user-attachments/assets/3def5056-ce75-4d24-89c7-809ffa584d14
+
 ## Features
 
 - 🎨 **Dynamic Icon Switching**: Change your app icon at runtime
@@ -16,7 +19,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  dynamic_app_icon_plus: ^0.0.1
+  dynamic_app_icon_plus:
 ```
 
 ## Quick Start
@@ -24,7 +27,7 @@ dependencies:
 ### 1. Add the dependency
 ```yaml
 dependencies:
-  dynamic_app_icon_plus: ^0.0.1
+  dynamic_app_icon_plus:
 ```
 
 Then run:
@@ -34,6 +37,8 @@ flutter pub get
 
 ### 2. Create a configuration file
 Create `icon_config.yaml` in your project root:
+
+**⚠️ Important: All icon files must be in PNG format for Android compatibility**
 
 ```yaml
 # The default_icon must reference an icon defined in the icons section below
@@ -50,10 +55,6 @@ icons:
     path: "assets/images/card2.png"
     label: "Independence Icon"
     description: "Festive independence-themed app icon"
-  payme:
-    path: "assets/images/pay.png"
-    label: "PayMe Icon"
-    description: "Payment-themed app icon"
   # You can add as many icons as you want with any names
   christmas:
     path: "assets/images/christmas.png"
@@ -92,15 +93,20 @@ String currentIcon = await DynamicAppIconPlus.getCurrentIcon();
 
 // Set default icon after app is fully loaded (optional)
 await DynamicAppIconPlus.setDefaultIcon();
+
+// Get icon paths for UI display
+List<String> iconPaths = DynamicAppIconPlus.availableIconPaths;
+
+// Get detailed icon information for rich UI
+List<Map<String, String>> iconDetails = DynamicAppIconPlus.availableIconDetails;
 ```
 
 ## Development Workflow
 
 ### During Development:
-1. **Always call `resetForDevelopment()`** after initialization to keep all activities enabled
-2. **Test icon changes** by calling `changeIcon()`
-3. **Restart the app** to see the icon change
-4. **If you can't run the app**, call `resetForDevelopment()` again
+1. **Test icon changes** by calling `changeIcon()`
+2. **Restart the app** to see the icon change
+3. **If you encounter issues** (like app not launching), call `resetForDevelopment()` to reset all activities
 
 ### For Production:
 1. **Remove the `resetForDevelopment()` call** from your production code
@@ -110,12 +116,55 @@ await DynamicAppIconPlus.setDefaultIcon();
 
 No manual registration, no complex setup - just add the dependency, create a config file, run the setup tool, and you're ready to go!
 
+## UI Examples
+
+### Simple Icon List with ListView.builder
+```dart
+ListView.builder(
+  itemCount: DynamicAppIconPlus.availableIcons.length,
+  itemBuilder: (context, index) {
+    final iconIdentifier = DynamicAppIconPlus.availableIcons[index];
+    final iconPath = DynamicAppIconPlus.availableIconPaths[index];
+    
+    return ListTile(
+      leading: Image.asset(iconPath, width: 48, height: 48),
+      title: Text(iconIdentifier),
+      onTap: () => DynamicAppIconPlus.changeIcon(iconIdentifier),
+    );
+  },
+)
+```
+
+### Rich Icon Selection UI
+```dart
+ListView.builder(
+  itemCount: DynamicAppIconPlus.availableIconDetails.length,
+  itemBuilder: (context, index) {
+    final icon = DynamicAppIconPlus.availableIconDetails[index];
+    
+    return Card(
+      child: ListTile(
+        leading: Image.asset(icon['path']!, width: 48, height: 48),
+        title: Text(icon['label']!),
+        subtitle: Text(icon['description']!),
+        trailing: IconButton(
+          icon: Icon(Icons.check_circle),
+          onPressed: () => DynamicAppIconPlus.changeIcon(icon['identifier']!),
+        ),
+      ),
+    );
+  },
+)
+```
+
 ## API Reference
 
 ### Methods
 
 #### `initialize(String configPath)`
 Initializes the plugin with a configuration file.
+
+
 
 #### `changeIcon(String? iconIdentifier)`
 Changes the app icon to the specified identifier.
@@ -134,9 +183,6 @@ Checks if the current platform supports dynamic app icons.
 #### `resetForDevelopment()`
 Resets all activities to enabled state for development.
 
-#### `getAvailableIconsFromPlatform()`
-Gets the list of available icon identifiers from the platform.
-
 #### `setDefaultIcon()`
 Sets the default icon after the app is fully loaded.
 - Call this method after the app has fully initialized to avoid crashes
@@ -146,6 +192,12 @@ Sets the default icon after the app is fully loaded.
 
 #### `availableIcons`
 Gets a list of all available icon identifiers from the configuration.
+
+#### `availableIconPaths`
+Gets a list of all available icon paths for UI display.
+
+#### `availableIconDetails`
+Gets detailed icon information for UI display (identifier, path, label, description).
 
 #### `isInitialized`
 Checks if the plugin has been initialized.
@@ -252,6 +304,7 @@ The plugin will automatically copy the appropriate resolution file to each densi
 - Flutter SDK: >=3.0.0
 - Android: API level 21+ (Android 5.0+)
 - Android Gradle Plugin: 7.0+
+- **Icon Format: PNG only** - Android app icons must be in PNG format for proper compilation
 
 ## Version Compatibility
 

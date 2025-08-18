@@ -154,5 +154,47 @@ icons:
       expect(config!.icons.containsKey('test_icon'), true);
       expect(config.icons['test_icon']!.label, 'Test Icon');
     });
+
+    test('availableIconPaths returns list of icon paths', () async {
+      await DynamicAppIconPlus.initializeFromString('''
+default_icon: "icon1"
+icons:
+  icon1:
+    path: "assets/icons/icon1.png"
+  icon2:
+    path: "assets/icons/icon2.png"
+''', validateFiles: false);
+
+      final paths = DynamicAppIconPlus.availableIconPaths;
+      expect(paths, containsAll(['assets/icons/icon1.png', 'assets/icons/icon2.png']));
+    });
+
+    test('availableIconDetails returns detailed icon information', () async {
+      await DynamicAppIconPlus.initializeFromString('''
+default_icon: "icon1"
+icons:
+  icon1:
+    path: "assets/icons/icon1.png"
+    label: "Icon One"
+    description: "First icon"
+  icon2:
+    path: "assets/icons/icon2.png"
+    label: "Icon Two"
+    description: "Second icon"
+''', validateFiles: false);
+
+      final details = DynamicAppIconPlus.availableIconDetails;
+      expect(details.length, 2);
+      
+      expect(details[0]['identifier'], 'icon1');
+      expect(details[0]['path'], 'assets/icons/icon1.png');
+      expect(details[0]['label'], 'Icon One');
+      expect(details[0]['description'], 'First icon');
+      
+      expect(details[1]['identifier'], 'icon2');
+      expect(details[1]['path'], 'assets/icons/icon2.png');
+      expect(details[1]['label'], 'Icon Two');
+      expect(details[1]['description'], 'Second icon');
+    });
   });
 }
