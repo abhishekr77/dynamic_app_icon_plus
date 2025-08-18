@@ -117,6 +117,8 @@ No manual registration, no complex setup - just add the dependency, create a con
 #### `initialize(String configPath)`
 Initializes the plugin with a configuration file.
 
+
+
 #### `changeIcon(String? iconIdentifier)`
 Changes the app icon to the specified identifier.
 - If `iconIdentifier` is null, empty, or unknown, it defaults to the default icon
