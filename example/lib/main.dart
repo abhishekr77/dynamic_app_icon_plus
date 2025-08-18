@@ -171,24 +171,48 @@ class _MyHomePageState extends State<MyHomePage> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             SizedBox(height: 8),
-            Expanded(
-              child: ListView(
-                children: [
-                  ...DynamicAppIconPlus.availableIcons.map((iconId) {
-                    final isCurrent = currentIcon == iconId;
-                    return Card(
-                      margin: EdgeInsets.only(bottom: 8),
-                      child: ListTile(
-                        title: Text(iconId),
-                        subtitle: Text(isCurrent ? 'Currently Active' : 'Tap to activate'),
-                        trailing: isCurrent ? Icon(Icons.check, color: Colors.green) : null,
-                        onTap: isLoading ? null : () => _changeIcon(iconId),
-                      ),
-                    );
-                  }).toList(),
-                ],
-              ),
+            ListView.builder(
+              shrinkWrap: true,
+              itemCount: DynamicAppIconPlus.availableIconDetails.length,
+              itemBuilder: (context, index) {
+                final icon = DynamicAppIconPlus.availableIconDetails[index];
+                final isCurrent = currentIcon == icon['identifier'];
+                return Card(
+                  child: InkWell(
+                    onTap: (){
+                      DynamicAppIconPlus.changeIcon(icon['identifier']!);
+                    },
+                    child: ListTile(
+
+                      leading: Image.asset(icon['path']!, width: 48, height: 48),
+                      title: Text(icon['label']!),
+                      subtitle: Text(icon['description']!),
+                      // trailing: isCurrent ? Icon(Icons.check, color: Colors.green) : null,
+
+                      trailing: Icon(Icons.check_circle, color: isCurrent?Colors.green:Colors.grey,)
+                    ),
+                  ),
+                );
+              },
             ),
+            // Expanded(
+            //   child: ListView(
+            //     children: [
+            //       ...DynamicAppIconPlus.availableIcons.map((iconId) {
+            //         final isCurrent = currentIcon == iconId;
+            //         return Card(
+            //           margin: EdgeInsets.only(bottom: 8),
+            //           child: ListTile(
+            //             title: Text(iconId),
+            //             subtitle: Text(isCurrent ? 'Currently Active' : 'Tap to activate'),
+            //             trailing: isCurrent ? Icon(Icons.check, color: Colors.green) : null,
+            //             onTap: isLoading ? null : () => _changeIcon(iconId),
+            //           ),
+            //         );
+            //       }).toList(),
+            //     ],
+            //   ),
+            // ),
             SizedBox(height: 16),
             ElevatedButton(
               onPressed: isLoading ? null : _resetToDefault,

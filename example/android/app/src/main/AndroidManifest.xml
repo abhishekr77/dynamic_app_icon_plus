@@ -2,7 +2,7 @@
     <application
         android:label="dynamic_app_icons_example"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher_default">
+        android:icon="@mipmap/ic_launcher_diwali">
         
         <!-- Main activity -->
         <activity
@@ -30,12 +30,12 @@
         <meta-data
             android:name="io.flutter.embedding.android.NormalTheme"
             android:resource="@style/NormalTheme" />
-<!-- Activity alias for default icon -->
+<!-- Activity alias for levelup icon -->
         <activity-alias
-            android:name=".defaultActivity"
+            android:name=".levelupActivity"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_default"
+            android:icon="@mipmap/ic_launcher_levelup"
             android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -69,12 +69,12 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- Activity alias for new_year icon -->
+        <!-- Activity alias for diwali icon -->
         <activity-alias
-            android:name=".new_yearActivity"
+            android:name=".diwaliActivity"
             android:enabled="false"
             android:exported="true"
-            android:icon="@mipmap/ic_launcher_new_year"
+            android:icon="@mipmap/ic_launcher_diwali"
             android:targetActivity=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

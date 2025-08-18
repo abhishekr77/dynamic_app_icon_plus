@@ -35,6 +35,8 @@ flutter pub get
 ### 2. Create a configuration file
 Create `icon_config.yaml` in your project root:
 
+**⚠️ Important: All icon files must be in PNG format for Android compatibility**
+
 ```yaml
 # The default_icon must reference an icon defined in the icons section below
 # You can use any icon name as the default_icon
@@ -106,6 +108,10 @@ List<Map<String, String>> iconDetails = DynamicAppIconPlus.availableIconDetails;
 ### For Production:
 1. **Remove the `resetForDevelopment()` call** from your production code
 2. **Icon changes will work normally** with proper activity switching
+
+## Demo
+
+https://user-images.githubusercontent.com/abhishekr77/dynamic_app_icon_plus/main/assets/demo.mp4
 
 ## That's It! 🎉
 
@@ -299,6 +305,7 @@ The plugin will automatically copy the appropriate resolution file to each densi
 - Flutter SDK: >=3.0.0
 - Android: API level 21+ (Android 5.0+)
 - Android Gradle Plugin: 7.0+
+- **Icon Format: PNG only** - Android app icons must be in PNG format for proper compilation
 
 ## Version Compatibility
 
