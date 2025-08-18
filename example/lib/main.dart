@@ -4,12 +4,12 @@ import 'package:dynamic_app_icon_plus/dynamic_app_icon_plus.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Automatic setup and initialization
+  // Initialize the plugin
   try {
-    await DynamicAppIconPlus.setup('example_config.yaml');
-    print('Plugin setup and initialized successfully');
+    await DynamicAppIconPlus.initialize('example_config.yaml');
+    print('Plugin initialized successfully');
   } catch (e) {
-    print('Failed to setup plugin: $e');
+    print('Failed to initialize plugin: $e');
   }
   
   runApp(MyApp());

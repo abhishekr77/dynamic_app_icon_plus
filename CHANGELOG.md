@@ -38,13 +38,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Detailed documentation and usage examples
 
 ### Features
-- `DynamicAppIconPlus.setup()` - Automatic project setup and initialization
-- `DynamicAppIconPlus.changeIcon()` - Change app icon to specified identifier
-- `DynamicAppIconPlus.resetToDefault()` - Reset to default app icon
-- `DynamicAppIconPlus.getCurrentIcon()` - Get currently active icon identifier
-- `DynamicAppIconPlus.isSupported()` - Check platform support
-- `DynamicAppIconPlus.validateSetup()` - Validate current setup
-- Command-line tool: `dart run dynamic_app_icon_plus:dynamic_app_icon_plus`
+      - `DynamicAppIconPlus.changeIcon()` - Change app icon to specified identifier
+      - `DynamicAppIconPlus.resetToDefault()` - Reset to default app icon
+      - `DynamicAppIconPlus.getCurrentIcon()` - Get currently active icon identifier
+      - `DynamicAppIconPlus.isSupported()` - Check platform support
+      - Command-line tool: `dart run dynamic_app_icon_plus:dynamic_app_icon_plus`
 
 ### Technical Details
 - Uses Flutter v2 embedding for Android

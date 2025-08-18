@@ -90,8 +90,7 @@ class DynamicAppIconPlus {
   /// Returns a list of icon identifiers that are available on the current platform.
   /// 
   /// @internal This method is for internal use only.
-  @visibleForTesting
-  static Future<List<String>> getAvailableIconsFromPlatform() async {
+  static Future<List<String>> _getAvailableIconsFromPlatform() async {
     try {
       final List<dynamic> result = await _channel.invokeMethod('getAvailableIcons');
       return result.cast<String>();
@@ -220,7 +219,9 @@ class DynamicAppIconPlus {
   /// 
   /// This method should be called before using any other methods.
   /// The [configString] should be a valid YAML string containing icon definitions.
-  static Future<void> initializeFromString(String configString, {bool validateFiles = true}) async {
+  /// 
+  /// @internal This method is for internal use only.
+  static Future<void> _initializeFromString(String configString, {bool validateFiles = true}) async {
     try {
       _config = IconConfig.fromYamlString(configString);
       final errors = _config!.validate(checkFiles: validateFiles);
@@ -233,6 +234,15 @@ class DynamicAppIconPlus {
     } catch (e) {
       throw FormatException('Failed to initialize DynamicAppIconPlus: $e');
     }
+  }
+
+  /// Initializes the plugin with a configuration string (for testing only).
+  /// 
+  /// This method is provided for testing purposes only.
+  /// Use [initialize] for production code.
+  @visibleForTesting
+  static Future<void> initializeFromString(String configString, {bool validateFiles = true}) async {
+    return _initializeFromString(configString, validateFiles: validateFiles);
   }
 
   /// Checks if the plugin has been initialized.
@@ -273,8 +283,7 @@ class DynamicAppIconPlus {
   /// This is a convenience method that combines initialization and setup.
   /// 
   /// @internal This method is for internal use only.
-  @visibleForTesting
-  static Future<void> setup(String configPath) async {
+  static Future<void> _setup(String configPath) async {
     final projectRoot = Directory.current.path;
     final runner = DynamicAppIconPlusBuildRunner(
       projectRoot: projectRoot,
@@ -290,8 +299,7 @@ class DynamicAppIconPlus {
   /// Returns a list of error messages, or an empty list if everything is valid.
   /// 
   /// @internal This method is for internal use only.
-  @visibleForTesting
-  static Future<List<String>> validateSetup(String configPath) async {
+  static Future<List<String>> _validateSetup(String configPath) async {
     final projectRoot = Directory.current.path;
     final runner = DynamicAppIconPlusBuildRunner(
       projectRoot: projectRoot,
@@ -304,8 +312,7 @@ class DynamicAppIconPlus {
   /// Creates a backup of the Android manifest before making changes.
   /// 
   /// @internal This method is for internal use only.
-  @visibleForTesting
-  static Future<void> backupAndroidManifest() async {
+  static Future<void> _backupAndroidManifest() async {
     final projectRoot = Directory.current.path;
     final runner = DynamicAppIconPlusBuildRunner(
       projectRoot: projectRoot,
@@ -318,8 +325,7 @@ class DynamicAppIconPlus {
   /// Restores the Android manifest from backup.
   /// 
   /// @internal This method is for internal use only.
-  @visibleForTesting
-  static Future<void> restoreAndroidManifest() async {
+  static Future<void> _restoreAndroidManifest() async {
     final projectRoot = Directory.current.path;
     final runner = DynamicAppIconPlusBuildRunner(
       projectRoot: projectRoot,
@@ -356,9 +362,16 @@ class DynamicAppIconPlus {
   }
 
   /// Resets the plugin state (mainly for testing purposes)
-  @visibleForTesting
-  static void reset() {
+  static void _reset() {
     _initialized = false;
     _config = null;
+  }
+
+  /// Resets the plugin state (for testing only).
+  /// 
+  /// This method is provided for testing purposes only.
+  @visibleForTesting
+  static void reset() {
+    _reset();
   }
 }
