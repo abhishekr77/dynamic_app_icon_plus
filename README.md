@@ -109,10 +109,6 @@ List<Map<String, String>> iconDetails = DynamicAppIconPlus.availableIconDetails;
 1. **Remove the `resetForDevelopment()` call** from your production code
 2. **Icon changes will work normally** with proper activity switching
 
-## Demo
-
-https://user-images.githubusercontent.com/abhishekr77/dynamic_app_icon_plus/main/assets/demo.mp4
-
 ## That's It! 🎉
 
 No manual registration, no complex setup - just add the dependency, create a config file, run the setup tool, and you're ready to go!
