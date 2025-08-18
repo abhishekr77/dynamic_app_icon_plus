@@ -1,14 +1,28 @@
 # Changelog
 
-All notable changes to the `dynamic_app_icons` plugin will be documented in this file.
+All notable changes to the `dynamic_app_icon_plus` plugin will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.2] - 2024-01-XX
+
+### Fixed
+- **Android Gradle Plugin Compatibility**: Added required `namespace` declaration to `android/build.gradle`
+- **SDK Version Compatibility**: Updated `compileSdkVersion` to 34 for Flutter 3.24.5+ compatibility
+- **Gradle Version**: Updated Android Gradle Plugin to 8.1.0 for better compatibility
+- **Duplicate Activity Aliases**: Fixed issue with duplicate activity aliases in AndroidManifest.xml
+
+### Technical Details
+- Added `namespace 'com.example.temp_plugin'` to plugin's build.gradle
+- Updated `compileSdkVersion` from 31 to 34
+- Updated Android Gradle Plugin from 7.3.0 to 8.1.0
+- Fixed example app's build.gradle to use `compileSdkVersion 34`
+
 ## [0.0.1] - 2024-01-XX
 
 ### Added
-- Initial release of dynamic_app_icons plugin
+- Initial release of dynamic_app_icon_plus plugin
 - Support for dynamically changing Android app icons at runtime
 - YAML-based configuration system for icon definitions
 - Command-line setup tool for automatic project configuration
